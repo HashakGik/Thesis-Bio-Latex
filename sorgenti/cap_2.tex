@@ -1,0 +1,765 @@
+\chapter{Modellazione formale}\label{cap:modellazione}
+	In questo capitolo vengono illustrate le caratteristiche ``interattive'' comuni a tutti i metabolismi biochimici (sezione \ref{sez:caratt}) e gli strumenti \emph{in silico} utili per la descrizione (sezione \ref{sez:silico}), con particolare enfasi verso la modellazione formale tramite catene di Markov (sezione \ref{sez:markov}), algebre di processi (sezione \ref{sez:processalgebra}) e logiche temporali (sezione \ref{sez:logiche}), e l'analisi, tramite simulazioni (sezione \ref{sez:simul}) e model checking (sezione \ref{sez:modelcheck}) di tali caratteristiche.
+
+	\section{Caratteristiche dei metabolismi biochimici}\label{sez:caratt}
+		Una rete metabolica \`e per sua natura costituita da un insieme di reazioni che \emph{interagiscono} tra loro in termini di quantit\`a e cinetiche.
+		
+		In generale una singola reazione pu\`o essere espressa come:
+		\begin{equation*}
+			S_1 + S_2 + \dots + S_n \xrightarrow{E , c_1, \dots, c_n} P_1 + P_2 + \dots + P_n,
+		\end{equation*}
+		dove l'insieme $\mathbb{S} = \{S_1, S_2, \dots, S_n\}$ costituisce i \emph{substrati} (o reagenti) della reazione e l'insieme $\mathbb{P} = \{P_1, P_2, \dots, P_n\}$ ne costituisce i \emph{prodotti}; i substrati sono specie chimiche che diminuiscono di quantit\`a, mentre i prodotti aumentano, essendo i primi trasformati nei secondi.
+		L'insieme, opzionale, $\mathbb{C} = \{E, c_1, \dots, c_n\}$ rappresenta i \emph{catalizzatori} (tipicamente costituiti da almeno un enzima e zero o pi\`u cofattori) della reazione, sostanze che \emph{accelerano} la cinetica di reazione, ma che non vengono modificate in quantit\`a; in termini biologici, le reazioni non catalizzate avvengono cos\`i lentamente che si pu\`o assumere che non possano avvenire affatto, in assenza di catalizzatori.
+		
+		Affinch\'e avvenga una reazione, secondo la teoria degli urti, \`e necessario che si verifichi una collisione tra le molecole di substrato, con sufficiente energia e corretto orientamento spaziale.
+		Una reazione chimica \`e quindi un processo aleatorio, la cui velocit\`a (rate) dipende da fattori quali temperatura (energia cinetica delle molecole) e concentrazione di substrati.
+		
+		La catalisi altera la cinetica, aumentando la probabilit\`a delle collisioni, grazie alla divisione della reazione in sottoreazioni termodinamicamente pi\`u favorite.
+		Per meccanismi di tipo allosterico (ovvero dove modifiche di forma dell'enzima si riflettono in alterazioni della cinetica), gli enzimi possono essere modulati in presenza di \emph{promotori} o \emph{inibitori}, che aumentano o diminuiscono, rispettivamente, il rate di reazione.
+		
+		Una o pi\`u reazioni costituiscono un \emph{metabolismo} se interagiscono tra loro.
+		Di seguito sono esemplificate alcune interazioni:
+		\begin{itemize}
+			\item se due reazioni sono in successione, i prodotti della prima costituiscono i reagenti della seconda: globalmente la reazione pi\`u lenta pu\`o costituire un collo di bottiglia;
+			\item se due reazioni utilizzano uno stesso substrato, vi competono;
+			\item se una reazione produce o sottrae un modulatore per l'enzima di un'altra reazione, la cinetica di quest'ultima viene alterata;
+			\item se una reazione produce o distrugge l'enzima (o suoi attivatori e inattivatori) di un'altra reazione, la cinetica di quest'ultima viene alterata;
+			\item se sono presenti sistemi di feedback all'interno di una stessa reazione (e.g.\ se il prodotto \`e anche un inibitore dell'enzima), la cinetica viene alterata nel tempo.
+		\end{itemize}
+		
+		In termini modellistici, un metabolismo costituisce un \emph{sistema reattivo} dove le singole componenti operano su un pool condiviso di risorse su cui competono con modalit\`a stocastiche e dove le risorse possono costituire esse stesse nuove componenti (e.g.\ una stessa sostanza pu\`o comportarsi da enzima in una reazione e da substrato in un'altra).
+		L'elevata dimensione del pool si riflette in un elevato grado di parallelismo, che rende il numero di interazioni estremamente elevato e, conseguentemente, l'analisi del sistema estremamente complicata e tipicamente non trattabile senza l'ausilio di \emph{astrazioni} quali:
+		\begin{itemize}
+			\item ragionare in termini di aliquote di sostanze, anzich\'e in termini di molecole (e.g.\ esprimendo le quantit\`a in moli, si ha un numero di interazioni di $6.022 \times 10^{23}$ volte minori rispetto al sistema reale, introducendo errori di campionamento tipicamente trascurabili);
+			\item eliminare componenti non reattive (ad esempio molecole che non cambiano di quantit\`a, come i cofattori, o che non alterano la cinetica di altre reazioni);
+			\item eliminare componenti poco reattive (i cui effetti sono trascurabili nel contesto preso in esame);
+			\item eliminare interazioni trascurabili (come inibizioni di entit\`a molto limitata);
+			\item aggregare pi\`u reazioni, eliminando tutte le sostanze intermedie e calcolando una cinetica complessiva.
+		\end{itemize}
+		
+	\subsection{Cinetica enzimatica di Michaelis-Menten}
+	La maggior parte degli enzimi \`e accomunata da una cinetica bifasica descritta genericamente dalle seguenti reazioni:
+	\begin{equation}
+	E + S \xrightleftharpoons[k_{-1}]{k_1} ES \xrightarrow{k_2} E + P,
+	\label{eq:cinetica}
+	\end{equation}
+	dove $E$ indica l'enzima ed $S$ il substrato da trasformare nel prodotto $P$ e dove la prima reazione causa la formazione reversibile del complesso enzima-substrato ($ES$, con costanti di equilibrio $k_1$ per la reazione diretta e $k_{-1}$ per quella inversa) mentre la seconda causa la formazione di prodotto (con costante di equilibrio $k_2$).
+	Come \`e noto, la soluzione dell'equazione differenziale che descrive la cinetica del sistema, dal punto di vista della concentrazione del complesso $ES$, sar\`a:
+	\begin{equation*}
+		\frac{d[ES]}{dt} = k_1 [E][S] - (k_{-1} + k_2) [ES],
+	\end{equation*}
+	essendo la velocit\`a complessiva pari alla differenza tra la velocit\`a di sintesi  e quella di degradazione.
+	
+	Indicando con $e_0$ la quantit\`a complessiva di enzima nel sistema, sar\`a vero in ogni momento: $[E] = e_0 - [ES]$ e sar\`a possibile ricavare $[ES]$ allo steady state, eguagliando le velocit\`a di sintesi e degradazione:
+	\begin{align*}
+		k_1[E][S] &= (k_{-1} + k_2)[ES]\\
+		[ES] &= \frac{k_1 e_0 [S]}{k_{-1} + k_2 + k_1[S]}.
+	\end{align*}
+	
+	La velocit\`a di formazione del prodotto sar\`a:
+	\begin{equation*}
+		\frac{d[P]}{dt} = k_2 [ES] = \frac{k_1 k_2 e_0 [S]}{k_{-1} + k_2 + k_1[S]}.
+	\end{equation*}
+	Ponendo $V_{max} = k_2 e_0$ e $K_M = \frac{k_{-1} + k_2}{k_1}$, \`e possibile riscrivere l'equazione come:
+	\begin{equation}
+	\frac{d[P]}{dt} = \frac{V_{max} [S]}{K_M + [S]}.
+	\label{eq:michaelis}
+	\end{equation}
+	
+	L'equazione \ref{eq:michaelis} prende il nome di \emph{equazione di Michaelis-Menten} e l'andamento della velocit\`a di sintesi del prodotto, in funzione della concentrazione di substrato, \`e descritto dalla figura \ref{fig:michaelis}.
+	
+	Per molti enzimi risulta spesso necessario arricchire la cinetica \ref{eq:cinetica} per descrivere pi\`u fedelmente il comportamento: un enzima comune pu\`o presentare substrati multipli, che formano complessi con svariati meccanismi, e interazioni con sostanze in grado di modulare la reazione (inibitori e promotori se, rispettivamente, diminuiscono o aumentano la velocit\`a di reazione).
+	Tuttavia, mantenendo costanti le concentrazioni di tutte le sostanze ad eccezione di quella di interesse, si osserva un andamento identico a quello descritto dall'equazione \ref{eq:michaelis}, dove le informazioni relative alle altre sostanze sono incluse nelle ``costanti'' $V_{max}$ e $K_M$, che diventano quindi funzioni di tutte le altre concentrazioni e sono dette \emph{costanti apparenti}.
+	
+	\subsection{Diffusione passiva}
+	Il fenomeno di diffusione di una sostanza \`e interamente governato dal suo \emph{potenziale chimico} e, allo steady state, vale la \emph{prima legge di Fick}:
+	\begin{equation*}
+		\mathbf{J} = -D \nabla \varphi,
+	\end{equation*}
+	che afferma che il flusso della sostanza varia proporzionalmente all'opposto del gradiente di concentrazione ($\nabla \varphi$) di quella sostanza, con $D$ \emph{coefficiente di diffusivit\`a}.
+	
+	Nel caso di un ambiente interno, separato dall'esterno da una membrana (o analogamente due compartimenti separati da una membrana), il gradiente pu\`o essere approssimato dalla differenza tra le concentrazioni tra l'interno e l'esterno:
+	\begin{equation*}
+		J = -D ([X_{dentro}] - [X_{fuori}]),
+	\end{equation*}
+	ma, essendo il flusso la derivata parziale della velocit\`a rispetto alla superficie ($\mathbf{J} = \frac{\partial\mathbf{v}}{\partial\mathbf{A}}$) e ponendo costante (in forma e dimensioni) la superficie attraversata, \`e possibile riscrivere l'equazione come:
+	\begin{equation}\label{eq:diffusione}
+	v_{ingresso} = k \cdot ([X_{fuori}] - [X_{dentro}]),
+	\end{equation}
+	dove $k$ \`e una costante, ricavabile sperimentalmente, che aggrega diffusivit\`a e superficie della membrana.
+	
+		
+	\section{Analisi \emph{in silico}}\label{sez:silico}
+		Le informazioni che possono essere inferite dalla semplice osservazione di un fenomeno sono tipicamente insufficienti per permettere una comprensione adeguata del fenomeno stesso.
+		Per aumentarne la comprensibilit\`a, il metodo scientifico si avvale di strumenti detti \emph{modelli}, che rappresentano nel modo pi\`u preciso possibile il fenomeno, permettendo la formulazione di ipotesi e la loro verifica sul modello (tramite processi di induzione, deduzione e abduzione), anzich\'e direttamente sul fenomeno (tramite esperimenti).
+		
+		Un modello ``cognitivo'' soffre tuttavia di ambiguit\`a, inconsistenze e incompletezze che possono introdurre errori, spesso significativi, sui risultati ottenuti dal modello, rispetto ai risultati sperimentali; un \emph{modello formale} ovvia all'inconveniente tramite rappresentazioni matematiche ben formate, ovvero non ambigue, consistenti e complete.
+		Poich\'e la complessit\`a dei fenomeni (e conseguentemente dei modelli che li rappresentano) \`e spesso elevata, un modello formale deve offrire la possibilit\`a di una risoluzione algoritmica (garantita dai formalismi matematici sottostanti) eseguita da un calcolatore, che diminuisca drasticamente il tempo di analisi ed elimini completamente il rischio di errori (di calcolo, avendo scongiurato quelli di fedelt\`a applicando le tecniche formali) che potrebbero passare inosservati a un esecutore umano.
+		
+		Tipicamente un singolo formalismo non \`e in  grado di catturare tutti gli aspetti (comportamentale, prestazionale, temporale e strutturale) di un fenomeno, di conseguenza vengono frequentemente integrati pi\`u modelli che descrivono le varie sfaccettature del fenomeno.
+		
+		Per un fenomeno \emph{reattivo} (ossia in grado di interagire con l'ambiente esterno), un modello potr\`a descrivere propriet\`a costitutive (che vengono definite \emph{stati}, ovvero ci\`o che il fenomeno ``\`e'' in un determinato istante) o propriet\`a interattive (dette \emph{azioni}, ovvero ci\`o che il sistema ``fa'' in un determinato istante).
+		Grazie a questo dualismo, \`e possibile ricondurre ogni modello reattivo a un \emph{grafo} (spesso esteso con informazioni aggiuntive), ovvero una coppia $\mathcal{G} = (\mathbb{V}, \mathcal{E})$, dove $\mathbb{V}$ \`e un insieme di vertici (che corrispondono agli stati del modello) ed $\mathcal{E} \subseteq \mathbb{V} \times \mathbb{V}$ rappresenta gli archi (che corrispondono alle azioni del modello), definiti come relazione tra vertici.
+		Ogni grafo possiede una rappresentazione grafica e, in ultima analisi, \`e possibile ricondurre qualsiasi tipologia di operazione sul grafo (e quindi sul modello che l'ha generato) a una ricerca di determinati percorsi, a partire da uno o pi\`u \emph{stati iniziali}.
+		
+		In figura \ref{fig:diag1} \`e esemplificato un modello per il dogma centrale della biologia molecolare, dove sia i vertici che gli archi sono arricchiti con etichette (la struttura cos\`i arricchita prende il nome di diagramma a stati e transizioni) e dove \`e stato evidenziato lo stato iniziale in grigio.
+		Il modello cattura la ``posizione'' dell'informazione genetica negli stati e in che modo possa essere trasferita da una componente all'altra (ma non, ad esempio, informazioni sulle cinetiche o sulla regolazione) e pu\`o essere utilizzato per derivare informazioni come: ``non \`e possibile trasferire l'informazione dalla proteina al DNA'', ``\`e possibile, ma non certo, che dal DNA si ottenga, prima o poi, una proteina'' e via dicendo.
+		Relativamente alla seconda proposizione si pu\`o notare che esistono i cicli infiniti $DNA \xrightarrow{trascrizione} RNA \xrightarrow{retrotrascrizione} DNA$ e $DNA \xrightarrow{replicazione} DNA$ che non raggiungono lo stato $Proteina$, motivo per cui viene affermata la possibilit\`a, anzich\'e la certezza.
+		
+		
+			\begin{figure}
+				\center
+				\begin{tikzpicture}[->, auto, node distance=5cm and 5cm, on grid, semithick, state/.style={circle, draw, black, minimum width=2cm}]
+				\node[state, fill=lightgray] (A) []{DNA};
+				\node[state] (B) [right= of A]{RNA};
+				\node[state] (C) [right= of B]{Proteina};
+				
+				\path (A) edge[loop above] node[]{replicazione} (A);
+				\path (A) edge[bend left=15] node[]{trascrizione} (B);
+				\path (B) edge[bend left=15] node[]{retrotrascrizione} (A);
+				\path (B) edge[] node[]{traduzione} (C);
+				
+				\end{tikzpicture}
+				\caption{Modello a stati e transizioni del dogma centrale della biologia molecolare}
+				\label{fig:diag1}
+			\end{figure}
+		
+		Un modello che codifica informazioni solo sugli stati \`e detto \emph{state-based}, se invece codifica solo azioni si dice \emph{action-based}.
+		Le due famiglie di modelli sono del tutto equivalenti, in quanto \`e possibile applicare le semplici conversioni:
+		\begin{labeling}{$stato \rightarrow azione$}
+			\item [$stato \rightarrow azione$] per ogni stato $s$, l'azione che lo precede viene definita come ``diventa vero $s$'';
+			\item [$azione \rightarrow stato$] per ogni azione $a$, lo stato che la precede viene definito come ``\`e possibile eseguire $a$''.
+		\end{labeling}
+		
+		Un'altra classificazione dei formalismi pu\`o essere costituita dal meccanismo di risoluzione delle scelte, ovvero in quale stato evolvere tra due o pi\`u possibili successori (nei modelli state-based) o quale eseguire tra due o pi\`u azioni abilitate (in quelli action-based). I principali meccanismi sono:
+		\begin{labeling}{non determinismo}
+			\item [non determinismo] non viene fissato alcun criterio di scelta, quindi tutti i possibili percorsi sul grafo verranno analizzati separatamente;
+			\item [priorit\`a] alle scelte \`e associato un valore numerico e, per ogni scelta, vengono eliminate quelle con la priorit\`a pi\`u bassa, nel caso in cui ci siano due priorit\`a uguali, si procede in maniera non deterministica;
+			\item [race policy] le scelte alternative competono secondo un criterio (temporale o probabilistico) e viene eseguita solo l'azione pi\`u ``veloce''.
+		\end{labeling}
+	
+		Da un modello formale \`e possibile eseguire:
+		\begin{labeling}{simulazioni}
+			\item [simulazioni] \emph{tracce}, intese come sequenze di stati o azioni che determinano un percorso sul modello, sono generate casualmente a partire dagli stati iniziali (o stabilite dal modellista in modo da raggiungere stati di suo interesse) e si osserva il comportamento del modello man mano che le tracce vengono percorse;
+			\item [verifiche] vengono definite delle propriet\`a e viene calcolato se il modello le \emph{soddisfa}, tramite una ricerca esaustiva su tutti gli stati e le azioni.
+		\end{labeling}
+		
+		I due approcci presentano pro e contro che rendono spesso auspicabile l'utilizzo integrato di entrambi.
+		Agendo le simulazioni su tracce, sono efficienti in termini di memoria, al costo di una intrinseca non esaustivit\`a e di un tempo di analisi che cresce linearmente con la lunghezza delle tracce.
+		Le verifiche invece sono corrette e complete rispetto alle propriet\`a e sono in grado di generare \emph{controesempi} nel caso di propriet\`a non verificate, al costo di un'estrema avidit\`a in memoria (salvo utilizzare tecniche simboliche)~\cite{simvsver}.
+		
+		Poich\'e la verifica formale risulta memory-intensive, sono spesso necessarie tecniche di modellazione che riducano la dimensione del modello, inficiando il meno possibile sulla fedelt\`a di quest'ultimo; le pi\`u comuni sono:
+		\begin{labeling}{composizione}
+			\item [astrazione] un grande spazio degli stati \`e ridotto definendo classi di equivalenza che eliminano informazioni sulle differenze di scarso interesse tra stati;
+			\item [composizione] un modello complesso \`e rappresentato (ed eventualmente semplificato) come un insieme di pi\`u modelli semplici che interagiscono.
+		\end{labeling}
+		
+		\subsection{Verifica formale}
+		
+		Le tecniche di verifica formale si dividono in:
+		\begin{labeling}{theorem proving}
+			\item [model checking] il modello \`e descritto con un formalismo riconducibile a un grafo di dimensione finita e le propriet\`a sono descritte in termini di raggiungibilit\`a di determinati vertici (o sequenze di questi);
+			\item [theorem proving] sia il modello che le propriet\`a sono descritte da formule logiche e la verifica avviene per dimostrazione di teoremi basati su quelle formule.
+		\end{labeling}
+		
+		Gli approcci al model checking tradizionale sono due~\cite{clarke1996formal}:
+		\begin{labeling}{model checking basato su automi}
+			\item [model checking temporale] il modello \`e descritto da un sistema di transizioni etichettate e le propriet\`a sono descritte da formule di logica temporale (che descrivono i percorsi in termini delle relazioni di ordinamento ``prima'' e ``dopo'' tra stati);
+			\item [model checking basato su automi] sia modello che propriet\`a sono descritti da automi e la verifica pu\`o avvenire tramite: inclusione di linguaggi~\cite{har1990software}, raffinamento di ordinamenti ed equivalence checking~\cite{cleaveland1993concurrency}.
+		\end{labeling}
+		
+		I due approcci sono equivalenti ed \`e possibile convertire un modello adatto a un approccio in un modello adatto all'altro~\cite{vardi1986automata}.
+		
+		Il \emph{model checking simbolico}~\cite{mcmillan1993symbolic} ovvia al problema dell'\emph{esplosione dello spazio degli stati}, ovvero il fenomeno per cui la dimensione del modello aumenta esponenzialmente all'aumentare del numero di componenti del sistema modellato, utilizzando strutture dette \emph{binary decision diagram}~\cite{bryant1986graph}, che ``compattano'' il grafo che si otterrebbe con le tecniche tradizionali.
+		Altri approcci per la riduzione del problema dell'esplosione, tramite eliminazione di stati inutili (ovvero astrazione), sono:
+		\begin{itemize}
+			\item sfruttamento delle informazioni sugli ordinamenti parziali~\cite{peled1994combining};
+			\item riduzione della localizzazione~\cite{kurshan1994complexity};
+			\item minimizzazione semantica~\cite{elseaidy1997modeling}.
+		\end{itemize}
+
+		Una tecnica correlata al model checking (e spesso integrata negli stessi tool), in quanto utilizza le stesse strutture per i modelli, \`e costituita dall'\emph{e\-quiv\-a\-lence checking}. Essa consiste nel verificare che tra due modelli diversi esista una \emph{relazione di equivalenza} comportamentale.
+		Se due modelli esibiscono lo stesso comportamento, allora soddisferanno le stesse propriet\`a (in un determinato sottoinsieme della logica temporale utilizzata) e ci\`o consente di coadiuvare il model checking, ad esempio:
+		\begin{itemize}
+			\item se un modello complesso \`e equivalente a uno talmente semplice da avere le propriet\`a banalmente verificate, \`e possibile bypassare completamente il model checking;
+			\item se un modello grande \`e equivalente a uno piccolo, \`e possibile effettuare il model checking su quello piccolo, risparmiando tempo e memoria;
+			\item modificando gli algoritmi di equivalence checking, \`e possibile \emph{minimizzare} in maniera automatica un modello, ottenendone uno pi\`u piccolo equivalente.
+		\end{itemize}
+		
+		Per \emph{caratterizzazione logica} di un'equivalenza comportamentale si intende l'insieme di tutte e sole le formule la cui soddisfacibilit\`a \`e mantenuta tra i due modelli equivalenti e pu\`o essere usata come definizione alternativa dell'equivalenza stessa~\cite{bernardo2008survey}.
+		 Inoltre se il modello \`e un'algebra di processi (sezione \ref{sez:processalgebra}), \`e possibile definire degli \emph{assiomi di equivalenza}, che permettono di correlare l'equivalenza comportamentale (semantica) all'equivalenza sintattica (ad esempio, se tra gli assiomi di equivalenza \`e presente la propriet\`a distributiva, varr\`a l'equivalenza $a.P + a.Q \sim a.(P + Q)$, senza dover effettuare controlli di natura semantica).
+		
+		Le equivalenze pi\`u comuni sono:
+		\begin{labeling}{equivalenza basata su test}
+			\item [equivalenza a tracce] due modelli sono equivalenti se, partendo dagli stati iniziali, tutte le tracce generate coincidono;
+			\item [bisimulazione] due modelli sono equivalenti se, partendo dagli stati iniziali, ognuno dei due modelli pu\`o simulare passo dopo passo qualsiasi azione eseguita dall'altro;
+			\item [equivalenza basata su test] un test \`e un modello (di struttura arbitraria) basato sulle stesse azioni dei modelli da verificare e arricchito dall'\emph{azione di successo}, un \emph{esperimento} \`e un modello costituito dalla \emph{composizione} di un test e del modello da verificare.
+			Si dice che l'esperimento \`e superato se prima o poi sar\`a possibile eseguire l'azione di successo, altrimenti l'esperimento \`e detto fallito. Due modelli sono equivalenti se l'esito degli esperimenti sar\`a lo stesso, per tutti i test costruibili con le loro azioni.
+		\end{labeling}
+		
+		Il \emph{theorem proving} si basa su sistemi deduttivi da cui ottenere la dimostrazione di un teorema nella forma ``modello $\implies$ propriet\`a''.
+		Poich\'e sia il modello che le propriet\`a sono formule logiche, \`e possibile operare anche su modelli di dimensione infinita (utilizzando, ad esempio, il principio di induzione). A differenza del model checking, che utilizza modelli molto pi\`u complessi, il theorem proving pu\`o essere effettuato anche per via manuale e l'ampia variet\`a di strumenti a disposizione copre un ampio spettro di interattivit\`a (da quelli semimanuali a quelli completamente automatizzati).
+		
+	\section{Catene di Markov}\label{sez:markov}
+	Un \emph{processo stocastico} \`e un modello che descrive l'andamento di un fenomeno aleatorio in funzione di una variabile indipendente detta \emph{tempo}. Se lo spazio degli stati (ovvero l'insieme di tutte le possibili condizioni in cui pu\`o trovarsi il processo) \`e discreto, il processo prende il nome di \emph{catena}. Se la distribuzione di probabilit\`a del fenomeno \`e caratterizzata dalla \emph{propriet\`a di assenza di memoria}, la catena \`e detta di Markov.
+	
+	Pi\`u formalmente, sia $X$ la distribuzione di probabilit\`a relativa al tempo di attesa in uno stato, allora la \emph{propriet\`a di Markov} indica che la probabilit\`a di transitare allo stato successivo dopo un tempo $t + s$, condizionata al tempo $s$ gi\`a trascorso, coincide con la probabilit\`a di transitare dopo il tempo $t$ residuo:
+	\begin{equation}
+		\mathcal{P}(X > t + s \mid X > s) = \mathcal{P}(X > t),\quad \forall t, s > 0.\label{eq:memorylessness}
+	\end{equation}
+	
+	Le due sole distribuzioni di probabilit\`a che soddisfano la propriet\`a di Markov sono le distribuzioni geometrica ($\mathcal{G}_p(n) = p(1 - p)^n$) nel caso di tempo discreto ed esponenziale ($\mathcal{E}_\lambda(t) = \lambda e^{-\lambda t}$) nel caso di tempo continuo.
+	Per definizione di probabilit\`a condizionata, si ha che l'equazione \ref{eq:memorylessness} pu\`o essere riscritta come:
+	\begin{equation*}
+		\mathcal{P}(X > t + s) = \mathcal{P} (X > s) \mathcal{P}(X > t);
+	\end{equation*}
+	per la distribuzione esponenziale vale:
+	\begin{equation*}
+		\mathcal{P}(X > t) = \int_{t}^{\infty} \lambda e^{-\lambda x} dx = e^{-\frac{t}{\lambda}},
+	\end{equation*}
+	ma allora, per sostituzione, si ha:
+	\begin{align*}
+		\mathcal{P}(X > t + s) &= e^{-\frac{t + s}{\lambda}}\\
+		&= e^{-\frac{t}{\lambda}} e^{-\frac{s}{\lambda}}\\
+		&= \mathcal{P} (X > t) \mathcal{P}(X > s),
+	\end{align*}
+	dimostrando il caso per la distribuzione esponenziale~\cite{expforgetfulness}; con un ragionamento analogo si dimostra il caso della distribuzione geometrica~\cite{geomforgetfulness}.
+
+	Una catena di Markov \`e detta a tempo discreto se il tempo viene osservato in \emph{passi} (di conseguenza tutte le catene di Markov a tempo discreto saranno governate da distribuzioni geometriche), se invece il tempo viene osservato con continuit\`a, viene detta \emph{a tempo continuo} (e sar\`a conseguentemente governata da distribuzioni esponenziali).
+	
+	Di seguito ci si concentrer\`a sulle catene di Markov a tempo continuo (CTMC), pi\`u adatte alla modellazione di reti metaboliche: dalla teoria degli urti, accennata nella sezione \ref{sez:caratt}, conseguono infatti l'assenza di memoria di una reazione chimica (in quanto la possibilit\`a o meno che avvenga un urto efficace tra due molecole di substrato non dipende da quanti urti, efficaci o meno, hanno gi\`a subito le molecole) e la natura continua del processo (lo spostamento delle molecole, e conseguentemente gli urti, non avvengono ``a scatti'').
+	
+	Formalmente una CTMC (secondo il formalismo adattato al model checking) \`e una tupla $\mathcal{M} = (\mathbb{S}, \mathbf{R}, \mathcal{P}_{init}, \mathbb{AP}, \mathcal{L})$, dove:
+	\begin{itemize}
+		\item $\mathbb{S}$ \`e lo spazio degli stati;
+		\item $\mathbf{R}$ \`e la matrice delle transizioni $\mathbf{R}: \mathbb{S}\times \mathbb{S} \mapsto \mathbb{R}_{\geq 0}$, una struttura che indica, per ogni coppia di stati $(s_1, s_2)$, con che rate (esponenziale) avviene la transizione $s_1 \rightarrow s_2$ (poich\'e il rate \`e l'inverso del tempo medio di attesa, una transizione che non pu\`o avvenire avr`a rate pari a 0);
+		\item $\mathcal{P}_{init}$ \`e la distribuzione di probabilit\`a iniziale, che indica da quali stati (e con che probabilit\`a) dovranno originarsi i cammini sulla catena;
+		\item $\mathbb{AP}$ \`e un insieme di proposizioni atomiche che rende pi\`u leggibile lo spazio degli stati;
+		\item $\mathcal{L}$ \`e la funzione di etichettamento degli stati $\mathcal{L}: \mathbb{S} \mapsto 2^{\mathbb{AP}}$, che associa a ogni stato zero o pi\`u etichette (ad esempio, associando allo stato $s_1$ le etichette ``X = \SI{10}{\mu mol}'', ``Y non ha ancora reagito'', ``Z esaurito'' e ``soluzione di colore azzurro''), rendendo pi\`u facilmente interpretabile la catena.
+	\end{itemize}
+	
+	Una catena di Markov si presta bene sia a tecniche simulative, basandosi sull'osservazione della matrice $\mathbf{R}$, che a tecniche di verifica, basandosi su formule di logica costruite su $\mathbb{AP}$.
+		
+	Ulteriore potere espressivo \`e dato dall'estensione della catena tramite strutture dette \emph{reward}, che rappresentano dei punteggi dal significato arbitrario (e.g.\ costi, tempi, quantit\`a).
+	Esistono due tipi di reward:
+	\begin{labeling}{reward istantaneo}
+		\item [reward istantaneo] punteggio applicato una volta sola, al passaggio da uno stato al successivo;
+		\item [reward cumulativo] punteggio moltiplicato al tempo di soggiorno nello stato a cui \`e associato.
+	\end{labeling}
+	
+	La tupla $\mathcal{M}$ viene estesa con la matrice $\iota : \mathbb{S} \times \mathbb{S} \mapsto \mathbb{R}$ che mappa ogni coppia di stati in un reward istantaneo e/o la funzione $\rho : \mathbb{S} \mapsto \mathbb{R}$ che associa un reward stazionario ad ogni stato.
+	
+	La tupla estesa $\mathcal{M} = (\mathbb{S}, \mathbf{R}, \mathcal{P}_{init}, \iota, \rho, \mathbb{AP}, \mathcal{L})$ prende il nome di Markov reward model (MRM)~\cite{aldini2007mixing}.
+	
+	\`E possibile rappresentare una catena di Markov tramite un diagramma a stati e transizioni, dove gli stati sono etichettati da $\mathcal{L}$ e le transizioni da $\mathbf{R}$.
+	Come \`e intuibile, questa rappresentazione permette di effettuare sia operazioni di simulazione che di model checking, in termini di cammini sulla catena.
+	In figura \ref{fig:markov} \`e rappresentata una catena con funzione di etichettamento:
+	\begin{equation*}
+		\mathcal{L} : \{s_0 \mapsto A, s_1 \mapsto B, s_2 \mapsto C\}
+	\end{equation*}
+	 e matrice delle transizioni:
+	 \begin{equation*}
+	 	\mathbf{R} = \begin{matrix}
+	 	0&0.5&0\\
+	 	100&2&1\\
+	 	3.14&0&0
+	 	\end{matrix}.
+	 \end{equation*}
+	
+	\begin{figure}
+		\center
+		\begin{tikzpicture}[->, auto, node distance=4cm and 4cm, on grid, semithick, state/.style={circle, draw, black, minimum width=2cm}]
+		\node[state] (EpS) []{$A$};
+		\node[state] (ES) [below right= of EpS]{$B$};
+		\node[state] (EpP) [above right= of ES]{$C$};
+		
+		\path (EpS) edge[bend right=15] node[left=0.5cm]{$0.5$} (ES);
+		\path (ES) edge[bend right=15] node[right=0.5cm]{$100$} (EpS);
+		\path (ES) edge[bend right=15] node[below=0.5cm]{$1$} (EpP);
+		\path (ES) edge[loop below] node{$2$} (ES);
+		\path (EpP) edge[bend right=15] node[above=0.5cm]{$3.14$} (EpS);
+		
+		
+		\end{tikzpicture}
+		\caption{Rappresentazione grafica di una catena di Markov a tempo continuo}
+		\label{fig:markov}
+	\end{figure}
+
+		\subsection{Linguaggio di modellazione di PRISM}\label{sez:prism}
+		PRISM~\cite{kwiatkowska2011prism} \`e un model checker per modelli probabilistici basati su catene di Markov, che utilizza un formalismo state-based per semplificare la creazione dei modelli.
+		I formalismi supportati sono:
+		\begin{labeling}{catene di Markov a tempo continuo (CTMC)}
+			\item [catene di Markov a tempo discreto (DTMC)] la risoluzione delle scelte \`e probabilistica;
+			\item [processi decisionali di Markov (MDP)]  la risoluzione pu\`o avvenire sia non deterministicamente che probabilisticamente;
+			\item [catene di Markov a tempo continuo (CTMC)] la risoluzione avviene tramite race policy su transizioni temporizzate esponenzialmente;
+			\item [automi probabilistici temporizzati (PTA)] la risoluzione pu\`o avvenire sia non deterministicamente che con race policy.
+		\end{labeling}
+		
+		Un modello PRISM \`e costituito da un insieme di \emph{moduli} -- ognuno dotato di un proprio \emph{stato interno} e di un comportamento -- che possono essere considerati delle piccole catene indipendenti.
+		
+		All'interno di un modulo, lo stato \`e rappresentato da \emph{variabili} che possono assumere valori appartenenti a un intervallo limitato e viene aggiornato ad ogni transizione.
+		Le transizioni possono essere \emph{etichettate} da un'azione e \emph{abilitate} da un'espressione di guardia.
+		Il comportamento di un modulo \`e descritto da una serie di \emph{comandi} nella forma:
+		\begin{equation*}
+			[azione] (guardia) \rightarrow prob_1 : agg_1 + prob_2 : agg_2 + \cdots + prob_n : agg_n,
+		\end{equation*}
+		dove $azione$ \`e l'etichetta da associare alla transizione, $guardia$ \`e un predicato che attiva la transizione solo negli stati in cui viene soddisfatto, $prob_n$ \`e una probabilit\`a (per DTMC e MDP) o un rate (per CTMC e PTA) e $agg_n$ \`e un'istruzione di aggiornamento.
+		La scelta tra pi\`u aggiornamenti (separati dall'operatore $+$) avviene tramite probabilit\`a o race policy.
+		Le istruzioni di aggiornamento sono nella forma:
+		\begin{equation*}
+			(x' = expr_x)\&(y' = expr_y)\&\cdots \& (z' = expr_z),
+		\end{equation*}
+		dove ogni variabile (a sinistra) \`e aggiornata valutando l'espressione a destra dell'uguale.
+		Se delle variabili vengono omesse, si assume che il loro valore non cambi.
+		
+		La catena di Markov a tempo continuo di figura \ref{fig:markov} pu\`o essere rappresentata da un singolo modulo contenente una sola variabile e con il comportamento descritto dai seguenti comandi:
+		\begin{align*}
+			[] (stato = A) &\rightarrow 0.5 : stato' = B\\
+			[] (stato = B) &\rightarrow 100 : stato' = A + 2 : stato' = B + 1 : stato' = C\\
+			[] (stato = C) &\rightarrow 3.14 : stato' = A\\
+		\end{align*}		
+		
+		Il modello del sistema \`e ottenuto per composizione dei singoli moduli, tramite \emph{sincronizzazione} su tutte le azioni aventi lo stesso nome.
+		PRISM presenta quattro motori computazionali (applicati a tutti i modelli a eccezione degli automi probabilistici temporizzati) per il \emph{model checking esatto}, che utilizzano rappresentazioni diverse del modello per ottimizzare le prestazioni nella maggior parte dei casi d'uso:
+		\begin{labeling}{MTBDD}
+			\item [explicit] il modello \`e rappresentato con una matrice delle transizioni e il model checking avviene per via tradizionale, con prestazioni temporali elevate, ma occupazione in memoria altrettanto elevata: ci\`o lo rende inadeguato per modelli di grosse dimensioni;
+			\item [sparse] il modello \`e rappresentato con una matrice sparsa, risparmiando enormi quantit\`a di memoria se il modello contiene molti stati non raggiungibili (in caso contrario l'occupazione in memoria \`e peggiore della matrice esplicita), anche in questo caso il model checking \`e di tipo tradizionale;
+			\item [MTBDD] la catena viene rappresentata da un multi terminal binary decision diagram (sezione \ref{sez:mtbdd}), risparmiando molta memoria se il modello presenta un elevato livello di regolarit\`a (ad esempio molte transizioni che convergono in uno stesso stato con lo stesso rate) al costo di prestazioni temporali ridotte; per modelli altamente irregolari l'occupazione in memoria potrebbe essere di molto maggiore rispetto alla matrice esplicita;
+			\item [hybrid] la catena viene rappresentata sia da un MTBDD che da una matrice sparsa e il model checking \`e di tipo ibrido~\cite{kwiatkowska2004probabilistic}, nella maggior parte dei casi offre il miglior compromesso tra occupazione in memoria e tempo di calcolo.
+		\end{labeling}
+		
+		PRISM \`e inoltre in grado di effettuare \emph{model checking statistico}~\cite{kwiatkowska2018probabilistic}, che permette di stimare l'esito di una propriet\`a a partire da \emph{simulazioni} sul modello, nel caso in cui le tecniche esatte non siano attuabili.
+		
+		PRISM \`e stato impiegato con successo in casi di studio in ambito biologico come i seguenti:
+		\begin{itemize}
+			\item controllo del ciclo cellulare eucariota~\cite{cyclin};
+			\item ciclo circadiano astratto~\cite{circadian};
+			\item via FGF~\cite{heath2008probabilistic};
+			\item DNA computing~\cite{dannenberg2013dna};
+			\item fusione dei virus dell'influenza~\cite{dobay2011many};
+			\item cinetica dei ribosomi~\cite{bovsnacki2009silico};
+			\item segnalazione dei linfociti T~\cite{owens2008modelling};
+			\item pacemaker cardiaci~\cite{chen2012quantitative}.
+		\end{itemize}
+
+	\section{Algebre di processi}\label{sez:processalgebra}
+	Le algebre di processi sono un formalismo action-based che estremizza il concetto di composizionalit\`a definendo un modello come un espressione costituita da operazioni (che determinano interazioni) tra entit\`a dette \emph{processi}: cos\`i come l'algebra dei numeri reali permette la costruzione di espressioni quali $3 + 2 \cdot 1.4$, un'algebra di processi permette di costruire modelli del tipo $a.(b.\underline{0} + c.\underline{0})$.
+	
+	Un processo \`e un'entit\`a che pu\`o compiere \emph{azioni} (evolvendo in altri processi) o rimanere bloccata (e in tal caso si indica come \emph{processo nullo}, rappresentato da $\underline{0}$) e le operazioni definite dall'algebra permettono di descrivere tutti i possibili comportamenti (intesi come tracce o punti di scelta) tramite un'espressione che utilizzi $\underline{0}$ o costanti (ad esempio $P$) che identifichino gli altri processi. Le operazioni definite da un'algebra di processi generica sono:
+	\begin{labeling}{composizione parallela}
+		\item [prefisso d'azione] $a.P$: viene eseguita l'azione $a$ e si evolve nel processo $P$;
+		\item [scelta] $P_1 + P_2$: si evolve in $P_1$ oppure $P_2$, secondo un meccanismo di risoluzione (come quelli esemplificati nella sezione \ref{sez:silico}) dipendente dall'algebra di processi. Nel caso di meccanismi diversi da quello non deterministico, \`e necessario arricchire le azioni con informazioni aggiuntive;
+		\item [composizione parallela] $P_1 \underset{\mathbb{A}}{\bowtie} P_2$: $P_1$ e $P_2$ evolvono parallelamente, indipendentemente tra loro per ogni azione non contenuta nell'insieme $\mathbb{A}$, ma aspettando ognuno la controparte (eventualmente per un tempo infinito) per eseguire \emph{contemporaneamente} le azioni contenute in $\mathbb{A}$;
+		\item [hiding] $P / \mathbb{A}$: tutte le azioni contenute in $\mathbb{A}$ diventano \emph{invisibili} (indicate con $\tau$). Questo operatore \`e particolarmente utile per l'equivalence checking basato su \emph{equivalenze deboli} (varianti delle equivalenze comportamentali che consentono di ignorare le azioni invisibili, nel caso della bisimulazione debole, ad esempio, ogni processo dovr\`a simulare passo dopo passo solo le azioni visibili della controparte, potendo ignorare tutte quelle invisibili);
+		\item [restrizione] $P \backslash \mathbb{A}$: nessuna delle azioni contenute nell'insieme $\mathbb{A}$ pu\`o essere eseguita;
+		\item [ricorsione] il processo evolve in s\'e stesso (tipicamente dopo aver eseguito alcune azioni), la notazione fa utilizzo delle costanti di processo e di equazioni di definizione ($P = comportamento$, dove $P$ compare all'interno del comportamento stesso).
+	\end{labeling}
+	
+	Un'equazione di process algebra che pu\`o generare il diagramma a stati e transizioni della figura \ref{fig:diag1} \`e la seguente:
+	\begin{equation*}
+		P = replicazione.P + trascrizione.(retrotrascrizione.P + traduzione.\underline{0}),
+	\end{equation*}
+	tuttavia risulta pi\`u agevole definire un sistema di equazioni con un numero maggiore di costanti (e con identificatori pi\`u descrittivi) nel seguente modo:
+	\begin{align*}
+		DNA &= replicazione.DNA + trascrizione.RNA\\
+		RNA &= retrotrascrizione.DNA + traduzione.PROTEINA.
+	\end{align*}
+	Dal sistema cos\`i definito risulta pi\`u semplice ricavare il diagramma a stati e transizioni, essendo sufficiente (in questo caso in cui manca l'operatore di sincronizzazione) creare uno stato per ogni processo ed etichettare le transizioni uscenti con le azioni abilitate in ognuno di essi.
+
+	Il contenuto informativo delle azioni, che determina il meccanismo di risoluzione, varia per ogni algebra di processi.
+	I modi pi\`u comuni per etichettare le transizioni sono:
+	\begin{labeling}{$\langle azione, priorit\`a\rangle$}
+		\item [$azione$] associare soltanto un'etichetta (eventualmente $\tau$) alla transizione, per algebre di processi \emph{non deterministiche};
+		\item [$\langle azione, priorit\`a\rangle$] per algebre di processi \emph{prioritarie};
+		\item [$\langle azione, tempo\rangle$] per algebre di processi \emph{temporizzate deterministicamente};
+		\item [$\langle azione, rate\rangle$] per algebre di processi \emph{stocastiche} (dove il $rate$ indica il parametro da associare a una distribuzione di probabilit\`a, tipicamente dotata di propriet\`a di Markov, usata per risolvere la race policy).
+	\end{labeling}
+	
+	Tra le algebre di processi stocastiche, spiccano quelle temporizzate esponenzialmente (tutte le azioni hanno distribuzione $\mathcal{E}(t) = \lambda e^{-\lambda t}$), dove la race policy \`e esprimibile (nel caso in cui i due rate non coincidano) tramite:
+	\begin{align*}
+		\langle a, \lambda \rangle.P_1 + \langle b, \mu \rangle.P_2 &\xrightarrow{a, \lambda} P_1 \text{ con probabilit\`a } \frac{\lambda}{\lambda + \mu}\\
+		\langle a, \lambda \rangle.P_1 + \langle b, \mu \rangle.P_2 &\xrightarrow{b, \mu} P_2 \text{ con probabilit\`a } \frac{\mu}{\lambda + \mu}.
+	\end{align*}
+	
+	Le algebre temporizzate esponenzialmente sono equivalenti a un diagramma a stati e transizioni esteso da informazioni sui rate di transizione, ovvero da catene di Markov a tempo continuo etichettate da azioni (ACTMC).
+		
+		\subsection{Bio-PEPA}\label{sez:biopepa}
+		Bio-PEPA~\cite{ciocchetta2009bio} \`e un'algebra di processi basata su Performance Evaluation Process Algebra (PEPA)~\cite{pepa} (un'algebra temporizzata esponenzialmente), alla quale aggiunge informazioni di tipo \emph{quantitativo} sui processi, finalizzate a semplificare la modellazione di sistemi biologici.
+		
+		Da un unico modello Bio-PEPA sono ottenibili modelli in altri formalismi che descrivono pi\`u aspetti del sistema modellato:
+		\begin{itemize}
+			\item un modello PRISM, che rappresenta una CTMC e una serie di formule CSL preformate, permette di effettuare model checking e simulazioni;
+			\item un modello basato su equazioni differenziali ordinarie permette di effettuare analisi sulla cinetica;
+			\item un modello StockKit~\cite{sanft2011stochkit2} permette di compilare un simulatore efficiente in linguaggio C.
+		\end{itemize}
+		I risultati delle analisi sui vari modelli vengono integrati automaticamente in un unico rapporto, contenente il modello Bio-PEPA e vari grafici ottenuti dalle analisi.
+		
+		Alcuni casi studio in cui \`e stato applicato Bio-PEPA sono:
+		\begin{itemize}
+			\item via NF-$\kappa$ B~\cite{ciocchetta2010modelling};
+			\item ciclo circadiano di \emph{Neurospora crassa}~\cite{akman2009modelling};
+			\item via gp130 JAK STAT~\cite{guerriero2009qualitative};
+			\item via cAMP/PKA/MAPK~\cite{ciocchetta2009compartmental};
+			\item modelli epidemiologici per l'influenza aviaria~\cite{ciocchetta2010bio};
+			\item ciclo circadiano di \emph{Ostreococcus tauri}~\cite{akman2010complementary}.
+		\end{itemize}
+		
+		Un modello Bio-PEPA \`e composto da tre sezioni:
+		\begin{itemize}
+			\item quantit\`a iniziali e costanti, definite in una matrice memorizzata in un file .csv: ogni riga della matrice costituisce un'\emph{istanza} dello stesso modello con valori diversi, agevolando l'esecuzione di pi\`u \emph{esperimenti} sullo stesso modello;
+			\item cinetiche e contatori, raggruppati nella sezione iniziale del file .biopepa;
+			\item processi veri e propri, raggruppati nella sezione finale del file .biopepa.
+		\end{itemize}
+		
+		Ogni azione \`e temporizzata esponenzialmente e il rate viene calcolato tramite espressioni (dette \emph{cinetiche}, anche se non vengono necessariamente utilizzate a tale scopo), che utilizzano la quantit\`a corrente ed eventuali costanti.
+		Ci\`o permette, ad esempio, di modellare l'andamento di una reazione, variandone il rate in funzione della concentrazione di substrati.
+		Un \emph{contatore} \`e un costrutto Bio-PEPA che permette di rappresentare grandezze derivate dal modello (ad esempio la carica energetica, come rapporto tra i nucleotidi trifosfati e i nucleotidi totali).
+		Sia cinetiche che contatori utilizzano la sintassi:
+		\begin{align*}
+			azione &= [espressione];\\
+			CONTATORE &= [espressione];
+		\end{align*}
+		dove $espressione$ pu\`o contenere qualsiasi identificatore definito nel file delle quantit\`a, costante numerica e operatore aritmetico.
+		
+		In Bio-PEPA, la  definizione dei processi avviene secondo un approccio \emph{bottom-up}, definendo prima il comportamento dei singoli elementi del sistema e poi componendoli (tipicamente tramite operatore di composizione parallela) in un unico processo rappresentante l'intero modello.
+		Per tenere conto delle quantit\`a, le azioni sono modificate nella coppia $(azione, stechiometria)$ (essendo il rate definito implicitamente nella sezione relativa alle cinetiche) e l'operatore prefisso d'azione \`e modificato nelle seguenti varianti:
+		\begin{labeling}{modulatore generico}
+			\item [reagente] $(azione, stechiometria) \downarrow P$: se le quantit\`a sono superiori a $stechiometria$, il processo diminuisce di tale quantit\`a ed evolve in $P$;
+			\item [prodotto] $(azione, stechiometria) \uparrow P$: il processo aumenta di $stechiometria$ unit\`a (eventualmente saturandosi fino a un massimo) ed evolve in $P$;
+			\item [attivatore] $(azione, stechiometria) \oplus P$: il processo abilita $azione$ se \`e presente in quantit\`a superiori a $stechiometria$, poi evolve in $P$ senza alterare di quantit\`a;
+			\item [inattivatore] $(azione, stechiometria) \ominus P$: il processo disabilita $azione$ se \`e presente in quantit\`a superiori a $stechiometria$, poi evolve in $P$ senza alterare di quantit\`a;
+			\item [modulatore generico] $(azione, stechiometria) \odot P$: il processo evolve in $P$ senza alterare di quantit\`a, questo operatore coincide con il prefisso d'azione tradizionale.
+		\end{labeling}
+		
+		Un modello esemplificativo, tratto da~\cite{ciocchetta2009bio} (a cui si rimanda per i risultati ottenuti dall'analisi sul modello), sulla regolazione genica a feedback negativo basata su dimerizzazione in \emph{E.\ coli}~\cite{bundschuh2003fluctuations} \`e il seguente:
+				
+		\begin{align*}
+			\alpha_1 &= \left[\frac{\nu}{K_M + P2}\right];\\
+			\alpha_2 &= [fMA(k_2)];\\
+			\alpha_3 &= [fMA(k_3)];\\
+			\alpha_4 &= [fMA(k_4)];\\
+			\alpha_5 &= [fMA(k_5)];\\
+			\alpha_{5i} &= [fMA(k_{5i})];
+		\end{align*}
+		\begin{align*}
+			M &= (\alpha_1, 1) \uparrow M + (\alpha_2, 1) \oplus M + (\alpha_3, 1) \downarrow M;\\
+			P &= (\alpha_2, 1) \uparrow P + (\alpha_4, 1) \downarrow P + (\alpha_5, 2) \downarrow P + (\alpha_{5i}, 2) \uparrow P;\\
+			P2 &= (\alpha_1, 1) \ominus P2 + (\alpha_5, 1) \uparrow P2 + (\alpha_{5i}, 1) \downarrow P2;\\
+		\end{align*}
+		\begin{equation}\label{eq:biopepa}
+			M \underset{\alpha_2}{\bowtie} P \underset{\{\alpha_5, \alpha_{5i}\}}{\bowtie} P2.
+		\end{equation}
+		
+				\begin{table}[H]
+					\centering
+					\begin{tabular}{| c | c |}
+						\hline
+						M & \SI{0}{nM}\\
+						\hline
+						P & \SI{0}{nM}\\
+						\hline
+						P2 & \SI{0}{nM}\\
+						\hline
+						$\nu$ & \SI{2.19}{s^{-1}}\\
+						\hline
+						$K_M$ & \SI{356}{nM}\\
+						\hline
+						$k_2$ & \SI{0.043}{s^{-1}}\\
+						\hline
+						$k_3$ & \SI{0.0039}{s^{-1}}\\
+						\hline
+						$k_4$ & \SI{0.0007}{s^{-1}}\\
+						\hline
+						$k_5$ & \SI{0.025}{s^{-1} nM^{-1}}\\
+						\hline
+						$k_{5i}$ & \SI{0.5}{s^{-1}}\\
+						\hline
+					\end{tabular}
+					\caption{Parametri del modello sulla regolazione genica basata su dimerizzazione di \emph{E.\ coli}}
+				\end{table}
+		Il modello \`e composto da sei reazioni:
+		\begin{labeling}{$\alpha_{5i}$}
+			\item [$\alpha_1$] trascrizione dell'mRNA ($M$), inibita dal dimero di proteina ($P2$);
+			\item [$\alpha_2$] traduzione dei monomeri di proteina ($P$), promossa dall'mRNA;
+			\item [$\alpha_3$] degradazione dell'mRNA;
+			\item [$\alpha_4$] degradazione della proteina;
+			\item [$\alpha_5$] dimerizzazione della proteina;
+			\item [$\alpha_{5i}$] rottura del dimero di proteina.
+		\end{labeling}
+		Ad eccezione di $\alpha_1$, tutte seguono la legge di azione di massa ($fMA$). Osservando i coefficienti stechiometrici, \`e evidente che siano tutte del primo ordine ($fMA(k) = k \frac{[prodotti]}{[reagenti]}$), esclusa $\alpha_5$, del secondo ordine ($fMA(k) = k \frac{[prodotti]}{[reagenti]^2}$).
+		
+	
+	\section{Logiche temporali}\label{sez:logiche}
+	Le logiche temporali sono un'estensione della logica dei predicati, basate su una relazione d'ordine di tipo ``prima-dopo''; grazie a tale relazione risultano uno strumento particolarmente efficace per descrivere \emph{percorsi} su un modello e, di conseguenza, propriet\`a verificabili tramite model checking.
+	
+	Partendo da \emph{predicati} che possono essere veri o falsi (atomici), \`e possibile costruirne di nuovi combinandoli con \emph{connettivi logici}. I connettivi pi\`u comuni sono:
+	\begin{labeling}{$\phi_1 \iff \phi_2$}
+		\item [$\neg \phi$] vero solo se $\phi$ \`e falso;
+		\item [$\phi_1 \wedge \phi_2$] vero se sia $\phi_1$ che $\phi_2$ sono veri;
+		\item [$\phi_1 \vee \phi_2$] vero se almeno uno tra $\phi_1$ e $\phi_2$ \`e vero;
+		\item [$\phi_1 \rightarrow \phi_2$] vero se $\phi_1$ e $\phi_2$ sono entrambi veri, oppure se $\phi_1$ \`e falso;
+		\item [$\phi_1 \leftrightarrow \phi_2$] vero se $\phi_1$ e $\phi_2$ sono entrambi veri oppure entrambi falsi.
+	\end{labeling}
+	
+	Aggiungendo delle variabili, \`e possibile \emph{quantificare} i predicati:
+	\begin{labeling}{$\forall x (\phi)$}
+		\item [$\forall x (\phi)$] vero se $\phi$ \`e vero per tutti i possibili valori di $x$;
+		\item [$\exists x (\phi)$] vero se $\phi$ \`e vero per almeno un valore di $x$.
+	\end{labeling}
+	
+	Gli \emph{operatori temporali} aggiungono la possibilit\`a di indicare quando dovr\`a essere vero un predicato, i pi\`u comuni (rivolti al futuro) sono:
+	\begin{labeling}{$\phi_1 \mathcal{R} \phi_2$}
+		\item [$\mathcal{X} \phi$] vero se $\phi$ sar\`a vero nell'immediato futuro;
+		\item [$\mathcal{F} \phi$] vero se prima o poi $\phi$ sar\`a vero;
+		\item [$\mathcal{G} \phi$] vero se $\phi$ \`e sempre vero;
+		\item [$\phi_1 \mathcal{U} \phi_2$] vero se $\phi_1$ \`e vero finch\'e non inizier\`a a valere $\phi_2$;
+		\item [$\phi_1 \mathcal{R} \phi_2$] vero se $\phi_2$ \`e vero finch\'e $\phi_1$ rimane vero.
+	\end{labeling}
+	
+	\`E possibile applicare le formule di una logica temporale a un modello a stati e transizioni (ad esempio una catena di Markov a tempo continuo), facendo coincidere l'insieme di predicati con l'insieme di etichette e definendo un'unica variabile relativa a un generico percorso $\omega$.
+	Sulla catena di figura \ref{fig:markov} \`e, ad esempio, possibile definire le propriet\`a $A$ (``lo stato corrente \`e $A$''), $A \wedge \mathcal{X} B$ (``lo stato corrente \`e $A$ e il prossimo sar\`a $B$'') o $\exists \omega (B \mathcal{U} C)$ (compattato in $\exists(B \mathcal{U} C$), ``esiste almeno un percorso in cui $B$ \`e vero finch\'e non inizier\`a a valere $C$'').
+	
+	La logica cos\`i costruita prende il nome di CTL* ed \`e molto espressiva, non imponendo vincoli su come combinare gli operatori: a tale espressivit\`a corrisponde il fatto che il problema della \emph{soddisfacibilit\`a} (data una formula e un modello, dire se \`e vera o falsa per quel modello) sia \emph{intrattabile} (classe di complessit\`a $2-EXPTIME$~\cite{visser2000practical}, sebbene in passato sia stato considerato addirittura \emph{indecidibile}~\cite{emerson1988complexity}).
+	
+	Imponendo dei vincoli su una logica temporale, \`e possibile creare delle logiche meno espressive, ma di cui \`e possibile calcolare la soddisfacibilit\`a, che si possono classificare in:
+	\begin{labeling}{branching time}
+		\item [linear time] \`e possibile ragionare solo su un percorso alla volta, quindi i quantificatori ($\forall$ e $\exists$) sono eliminati; la logica linear time ottenuta a partire da CTL* prende il nome di \emph{linear temporal logic} (LTL);
+		\item [branching time] \`e possibile ragionare solo sulle scelte disponibili, quindi gli operatori temporali ($\mathcal{X}$, $\mathcal{F}$, $\mathcal{G}$, $\mathcal{U}$ e $\mathcal{R}$) devono essere sempre quantificati (``tra le scelte a disposizione, almeno una oppure tutte verificheranno una certa condizione''); la logica branching time ottenuta a partire da CTL* prende il nome di \emph{computation tree logic} (CTL, senza asterisco).
+	\end{labeling}
+	
+	Probabilistic CTL (PCTL)~\cite{hansson1994logic} estende CTL con gli operatori:
+	\begin{labeling}{$\mathbb{S}$}
+		\item [$\mathbb{P}$] operatore di probabilit\`a, vero se la probabilit\`a che sia verificata la sottoformula a cui \`e applicato \`e limitata da un certo intervallo, considerando le possibili scelte;
+		\item [$\mathbb{S}$] operatore di probabilit\`a allo steady state, come $\mathbb{P}$, ma allo stato stazionario.
+	\end{labeling}
+	
+	I due operatori possono essere usati sia per ottenere valori numerici, nella forma $\mathbb{P}_{=?} [\phi]$ (``quale \`e la probabilit\`a che $\phi$ sia vera?''), che per ottenere valori di verit\`a, nella forma $\mathbb{P}_{[a,b]} [\phi]$ (``la probabilit\`a che $\phi$ sia vera \`e compresa tra $a$ e $b$?'').
+	In PCTL i quantificatori risultano superflui, in quanto valgono le equivalenze $\forall(\phi) = \mathbb{P}_{=1}[\phi]$ e $\exists(\phi) = \mathbb{P}_{>0}[\phi]$.
+	
+		\subsection{Continuous Stochastic Logic}
+		Passando da un modello probabilistico a uno temporizzato esponenzialmente, \`e necessario poter catturare anche aspetti relativi al tempo trascorso.
+		CSL~\cite{baier2003model} modifica gli operatori temporali di PCTL rendendoli \emph{time-bounded}, ovvero imponendo un limite temporale entro cui devono essere verificati.
+		
+		Gli operatori time-bounded si indicano con $\mathcal{OP}^{[a,b]}$, dove $\mathcal{OP}$ \`e un'operatore temporale e $[a,b]$ \`e l'intervallo temporale entro quale deve valere la sottoformula.
+		\`E possibile ricavare gli operatori temporali illimitati (tradizionali) osservando che $\mathcal{OP} = \mathcal{OP}^{< \infty}$, quindi CSL \`e pi\`u espressivo di PCTL.
+		
+		Un esempio di propriet\`a CSL da verificare sul modello \ref{eq:biopepa} (dove, a seguito della conversione, il processo $P$ corrisponde alla componente $\_P$) pu\`o essere:
+		\begin{equation*}
+			\mathbb{P}_{=?}[\mathcal{G}^{\leq 0.5} \_P2 > 10]
+		\end{equation*}
+		``Quale \`e la probabilit\`a che il dimero di proteina sia \emph{sempre} in quantit\`a maggiore di 10 unit\`a, nelle prime 0.5 unit\`a di tempo?''\\
+		\`E importante notare che ci\`o che avviene fuori dall'intervallo in cui sono limitati gli operatori viene \emph{ignorato} e non deve necessariamente essere falso (nell'esempio il calcolo della probabilit\`a non \`e influenzato dal fatto che $\_P2 > 10$ sia vero o meno dal tempo 0.51 al tempo 10).
+		
+		Se il modello \`e arricchito da reward, \`e possibile estendere CSL con l'operatore $\mathbb{R}$, che permette di misurare il valore dei reward accumulati lungo un percorso: la logica cos\`i arricchita prende il nome di \emph{continuous stochastic reward logic} (CSRL)~\cite{baier2000logical}.		
+		
+		PRISM definisce cinque varianti per l'operatore $\mathbb{R}$~\cite{reward}:
+		\begin{labeling}{$\mathbb{R}_{\{rew\}} {[\mathcal{C} \leq T]}$}
+			\item [$\mathbb{R}_{\{rew\}} {[\mathcal{F} \phi]}$] accumula i reward, definiti secondo la struttura $rew$, finch\'e il predicato $\phi$ non \`e verificato;
+			\item [$\mathbb{R}_{\{rew\}} {[\mathcal{C} \leq T]}$] accumula i reward, definiti secondo $rew$, fino al tempo $T$;
+			\item [$\mathbb{R}_{\{rew\}} {[\mathcal{C}]}$] accumula i reward, definiti secondo $rew$, fino a un tempo infinito;
+			\item [$\mathbb{R}_{\{rew\}} {[\mathcal{I} = T]}$] restituisce i reward, definiti secondo $rew$, all'istante $T$;
+			\item [$\mathbb{R}_{\{rew\}} {[\mathcal{S}]}$] restituisce i reward, definiti secondo $rew$, allo stato stazionario.
+		\end{labeling}
+		Come $\mathbb{P}$ ed $\mathbb{S}$, anche $\mathbb{R}$ pu\`o essere usato nelle varianti $\mathbb{R}_{=?}$ e $\mathbb{R}_{[a, b]}$, permettendo il calcolo di un valore o la verifica che il valore sia entro un intervallo.
+	
+	\section{Simulazioni su catene di Markov a tempo continuo}\label{sez:simul}
+	In una CTMC, la matrice delle transizioni $\mathbf{R}$ pu\`o anche essere vista come il prodotto tra la probabilit\`a di transizione e il vettore dei tempi medi di soggiorno ($\mathbf{R}_{i,j} = \mathbf{P}_{i,j} \cdot \mathbf{r}_{i}$): astraendo da $\mathbf{r}$ si ottiene una catena di Markov a tempo discreto, detta \emph{embedded Markov chain} (EMC)~\cite{simulationmarkov}.
+	
+	L'algoritmo di Gillespie~\cite{gillespie1977exact} (applicato inizialmente alla simulazione di un sistema di reazioni chimiche e successivamente generalizzato alle catene di Markov a tempo continuo) costituisce una procedura numerica esatta per la simulazione di eventi stocastici, basandosi su tecniche Monte Carlo.
+	
+	Partendo da uno stato iniziale, estratto casualmente dalla CTMC secondo la distribuzione $\mathcal{P}_{init}$, si genera iterativamente un percorso, finch\'e non si raggiunge un tempo di terminazione $T$; ad ogni istante, se lo stato corrente \`e $s_k$, il tempo di soggiorno viene estratto casualmente secondo una distribuzione esponenziale con rate $\mathbf{r}_k$ e lo stato successivo \`e scelto estraendo una variabile aleatoria con distribuzione pari alla riga della matrice delle probabilit\`a $\mathbf{P}_{k,-}$.
+	Qualora sia necessario ottenere valori esatti, la media di pi\`u percorsi avr\`a un andamento convergente a quello del fenomeno modellato.
+	
+	\begin{algorithm}[H]
+			\KwData{$\mathcal{M} = (\mathbb{S}, \mathbf{P}, \mathbf{r}, \mathcal{P}_{init}), T$}
+			\KwResult{Percorso sulla catena fino al tempo $T$}
+			$s_0 \leftarrow$ stato iniziale estratto da $\mathcal{P}_{init}$\;
+			$k \leftarrow 0$\;
+			$t \leftarrow 0$\;
+			\While{$t < T$}{
+				$P_{s_k} \leftarrow$ riga di $\mathbf{P}$ corrispondente allo stato $s_k$\;
+				$s_{k+1}$ estratto casualmente secondo la distribuzione $P_{s_k}$\;
+				$t_k$ estratto casualmente secondo una distribuzione esponenziale con rate $\mathbf{r}_{s_k}$\;
+				$t \leftarrow t + t_k$\;
+				$k \leftarrow k + 1$\;
+			}
+		\KwRet{$s_0 \xrightarrow{t_0} s_1 \xrightarrow{t_1} \dots \xrightarrow{t_{n-1}} s_n$.}
+		\caption{Algoritmo di Gillespie per la simulazione di un percorso su una CTMC fino al tempo T}
+		\label{alg:gillespie}
+	\end{algorithm}
+	
+	\section{Model checking di catene di Markov a tempo continuo}\label{sez:modelcheck}
+	CSL \`e formalmente definito da tutte le formule costruibili a partire dalla seguente grammatica:
+	\begin{align}
+		\phi ::=& \top \mid atomo \mid \phi \wedge \phi \mid \neg \phi \mid \mathbb{P}_{\bowtie p} [\psi] \mid \mathbb{S}_{\bowtie p} [\phi]\label{eq:state}\\
+		\psi ::=& \mathcal{X} \phi \mid \phi \mathcal{U} \phi \mid \phi \mathcal{U}^{\leq t} \phi\label{eq:path},
+	\end{align}
+	dove la produzione \ref{eq:state} viene espansa in una \emph{formula di stato} e \ref{eq:path} in una formula di percorso.
+	L'insieme di formule ottenuto \`e \emph{funzionalmente completo}, \`e quindi possibile ottenere tutti gli altri operatori a partire da quelli gi\`a definiti (ad esempio $\phi_1 \vee \phi_2 = \neg(\neg \phi_1 \wedge \neg \phi_2)$, oppure $\mathcal{F}(\phi) = \top \mathcal{U} \phi$).
+	Sebbene valga l'uguaglianza $\phi_1 \mathcal{U} \phi_2 = \phi_1 \mathcal{U}^{< \infty} \phi_2$, vengono indicate entrambe le varianti dell'operatore, essendo, all'atto pratico, conveniente utilizzare due algoritmi di model checking diversi.
+	
+	La semantica associata alle formule di stato \`e la seguente:
+	\begin{align}
+		s \models \top &\quad\forall s \in \mathbb{S}\label{eq:true}\\
+		s \models atomo &\iff atomo \in \mathcal{L}(s)\\
+		s \models \phi_1 \wedge \phi_2 &\iff s \models \phi_1 \wedge s \models \phi_2\\
+		s \models \neg \phi &\iff s \not \models \phi\label{eq:not}\\
+		s \models \mathbb{P}_{\bowtie p} [\psi] &\iff Prob_s(\{\omega \in Path_s \mid \omega \models \psi\}) \bowtie p\label{eq:prob}\\
+		s \models \mathbb{S}_{\bowtie p} [\phi] &\iff \underset{s' \models \phi}{\sum} \pi_s(s') \bowtie p\label{eq:stead},
+	\end{align}
+	e quella associata alle formule di percorso risulta:
+	\begin{align}
+		\omega \models \mathcal{X} \phi &\iff \exists \omega(1) \wedge \omega(1) \models \phi\label{eq:next}\\
+		\omega \models \phi_1 \mathcal{U} \phi_2 &\iff \exists k \geq 0, \omega(k) \models \phi_2 \wedge \forall j < k, \omega(j) \models \phi_1\label{eq:unbounduntil}\\
+		\omega \models \phi_1 \mathcal{U}^{\leq t} \phi_2 &\iff \exists x \in [0; t], \omega @ x \models \phi_2 \wedge \forall y \in [0; x), \omega @ y \models \phi_1\label{eq:bounduntil}.
+	\end{align}
+	
+	Le regole \ref{eq:true}--\ref{eq:not} definiscono predicati e connettivi logici con il loro significato tradizionale.
+	La regola \ref{eq:prob} asserisce che $\mathbb{P}_{\bowtie p} [\psi]$ \`e soddisfatto dallo stato $s$ se e solo se la probabilit\`a che tutti i percorsi $\omega$ che si originano da $s$ soddisfino $\psi$ \`e in relazione $\bowtie$ con $p$ (ad esempio $\leq 0.5$).
+	La regola \ref{eq:stead} afferma, invece, che $\mathbb{S}_{\bowtie p} [\phi]$ \`e soddisfatto dallo stato $s$ se e solo se la somma delle probabilit\`a a regime delle transizioni da $s$ a qualsiasi stato $s'$ che soddisfi $\phi$ \`e $\bowtie p$.
+	
+	La regola \ref{eq:next} asserisce che $\mathcal{X} \phi$ \`e soddisfatto dal percorso $\omega$ se e solo se esiste uno stato successivo ($\omega(1)$) a quello corrente e tale stato soddisfa $\phi$.
+	Le regole \ref{eq:unbounduntil} e \ref{eq:bounduntil} descrivono la semantica dell'operatore $\mathcal{U}$ nei casi illimitato e limitato.
+	Nel primo, $\phi_1 \mathcal{U} \phi_2$ \`e soddisfatto da $\omega$ se e solo se esiste uno stato futuro $\omega(k)$ che soddisfa $\phi_2$ e tutti gli stati precedenti a $\omega(k)$ soddisfano $\phi_1$.
+	Nel secondo caso, $\phi_1 \mathcal{U}^{\leq t} \phi_2$ \`e soddisfatto da $\omega$ se e solo se esiste un tempo $x$ minore o uguale a $t$ in cui lo stato occupato al tempo $x$ soddisfa $\phi_2$ e qualsiasi stato occupato in un tempo minore di $x$ soddisfa $\phi_1$.
+	
+	Il tempo richiesto per la terminazione degli algoritmi di model checking \`e lineare rispetto alla lunghezza della formula e polinomiale rispetto al numero di stati del modello. Pi\`u in dettaglio, la verifica della formula $\mathbb{P}_{\bowtie p} [\phi_1 \mathcal{U} \phi_2]$ ha complessit\`a asintotica $O(|\mathbb{S}|^3 + |\phi|)$, mentre la verifica di $\mathbb{P}_{\bowtie p} [\phi_1 \mathcal{U}^{\leq t} \phi_2]$ ha complessit\`a $O(|\mathbb{S}|^2 + q \cdot t + |\phi|)$ (con $q$ fattore di uniformizzazione utilizzato per il metodo di Jensen)~\cite{ctmc}.
+
+	In PRISM, la verifica degli operatori $\mathbb{P}$, $\mathbb{R}[\mathcal{I} = t]$ e $\mathbb{R}[\mathcal{C} \leq t]$ avviene grazie al \emph{metodo di Jensen} (o algoritmo di uniformizzazione), mentre per gli operatori $\mathbb{S}$, $\mathbb{R}[\mathcal{F}  \phi]$ e $\mathbb{R}[\mathcal{S}]$ si utilizzano metodi basati sulla risoluzione di sistemi di equazioni lineari.
+	
+	L'algoritmo di uniformizzazione fissa un fattore $q$ pari al rate della transizione pi\`u veloce della CTMC e, scalando tutte le transizioni del fattore $q$, ottiene una DTMC che ne approssima il comportamento e su cui \`e possibile calcolare il vettore delle probabilit\`a transitorie dello stato $s$ dopo un tempo $t$ tramite:
+	\begin{equation*}
+		\underline{\pi}_{s,t} = \underline{\pi}_{s, 0} \cdot \sum\limits_{i = 0}^{\infty} \mathcal{P}_{q\cdot t}(i) \cdot \mathbf{P}^i,
+	\end{equation*}
+	dove $\underline{\pi}_{s, 0}$ \`e il vettore delle probabilit\`a transitorie iniziali, $\mathcal{P}_\lambda(n) = \frac{\lambda^n e^{-\lambda}}{n!}$ \`e la distribuzione di probabilit\`a di Poisson e $\mathbf{P}$ \`e la matrice delle probabilit\`a di transizione ($\mathbf{R}$ scalato del fattore $q$).
+	Metodi numerici, come quello di \emph{Fox-Glynn}, approssimano il calcolo fissando un errore $\varepsilon$ e troncando la sommatoria quando l'errore sulla probabilit\`a stimata \`e inferiore a $\varepsilon$.
+	
+	A partire dalla DTMC uniformizzata, sono utilizzati i tre algoritmi di model checking:
+	\begin{labeling}{$\mathbb{P}{[\phi_1 \mathcal{U}^{\leq t} \phi_2]}$}
+		\item [$\mathbb{P}{[\mathcal{X}\phi]}$] si verifica banalmente calcolando la probabilit\`a che $\phi$ sia vero nei successori dello stato iniziale;
+		\item [$\mathbb{P}{[\phi_1 \mathcal{U} \phi_2]}$] eliminati gli stati che soddisfano la propriet\`a CTL $\forall[\phi_1 \mathcal{U} \phi_2]$ e quelli che non soddisfano $\exists[\phi_1 \mathcal{U} \phi_2]$, si risolve il \emph{problema del percorso stocastico pi\`u breve} sugli stati rimanenti~\cite{probabilistic};
+		\item [$\mathbb{P}{[\phi_1 \mathcal{U}^{\leq t} \phi_2]}$] eliminando dalla DTMC uniformizzata tutte le transizioni che escono dagli stati che soddisfano $\phi_2$ e da tutti gli stati che non soddisfano la formula CTL $\exists [\phi_1 \mathcal{U} \phi_2]$, si calcola la probabilit\`a di trovarsi in uno stato in cui valga $\phi_2$ al tempo $t$~\cite{parker2003implementation}.
+	\end{labeling}
+
+	\subsection{Model checking simbolico}\label{sez:mtbdd}
+	Poich\'e la classe di complessit\`a degli algoritmi di model checking \`e \emph{polinomiale} rispetto allo spazio degli stati (ma questi crescono esponenzialmente al crescere del numero di componenti del sistema), \`e spesso opportuno effettuare il model checking utilizzando rappresentazioni simboliche della CTMC note come \emph{multi terminal binary decision diagram} (MTBDD).
+	
+	Una funzione logica \`e definita come $f(x_1, x_2, \dots, x_n): \mathbb{B}^n \mapsto \mathbb{B}$ e ad essa pu\`o essere associato un \emph{albero di decisione} che la descrive graficamente.
+	Ogni nodo dell'albero rappresenta una variabile e possiede due figli: uno raggiunto se la variabile \`e vera, l'altro se la variabile \`e falsa; le foglie costituiscono il valore della funzione.
+	
+	In tabella \ref{tab:logica} \`e esemplificata la tabella di verit\`a della funzione logica $(x \vee y) \wedge z$ e in figura \ref{fig:albero} il corrispondente albero di decisione (con il ramo vero rappresentato da una linea continua e quello falso da una linea tratteggiata).
+	Come si pu\`o notare, per una funzione di $n$ variabili, l'albero di decisione ha $2^{n+1} - 1$ nodi.
+	
+	Un \emph{binary decision diagram} (BDD)~\cite{bryant1986graph} \`e un grafo diretto aciclico che collassa insieme pi\`u nodi dell'albero di decisione, ottenendo una rappresentazione compatta e canonica (due BDD della stessa funzione booleana sono sempre isomorfi).
+	In figura \ref{fig:bdd} \`e rappresentato il BDD relativo all'albero di decisione di figura \ref{fig:albero}.
+	
+	\begin{table}
+		\centering
+		\begin{tabular}{| c | c | c | c |}
+			\hline
+			$x$ & $y$ & $z$ & $(x \vee y) \wedge z$ \\
+			\hline
+			0 & 0 & 0 & 0 \\
+			\hline
+			0 & 0 & 1 & 0 \\
+			\hline
+			0 & 1 & 0 & 0 \\
+			\hline
+			0 & 1 & 1 & 1 \\
+			\hline
+			1 & 0 & 0 & 0 \\
+			\hline
+			1 & 0 & 1 & 1 \\
+			\hline
+			1 & 1 & 0 & 0 \\
+			\hline
+			1 & 1 & 1 & 1 \\
+			\hline
+		\end{tabular}
+		\caption{Tabella di verit\`a della funzione logica $(x \vee y) \wedge z$}
+		\label{tab:logica}
+	\end{table}
+	
+	\begin{figure}
+		\center
+		\begin{tikzpicture}[->, auto, on grid, semithick, state/.style={circle, solid, draw, black, minimum width=0.75cm}, leaf/.style={rectangle, solid, draw, black, minimum size=0.75cm},level/.style={sibling distance = 6cm/#1,
+			level distance = 1.5cm}]
+		\node [state] {$x$}
+			child[dashed]{ node [state] {$y$}
+				child[dashed]{ node [state] {$z$} 
+					child[dashed]{ node [leaf] {0}}
+					child[solid]{ node [leaf] {0}}
+				}
+				child[solid]{ node [state] {$z$}
+					child[dashed]{ node [leaf] {0}}
+					child[solid]{ node [leaf] {1}}
+				}
+			}
+		child{ node [state] {$y$}
+			child[dashed]{ node [state] {$z$} 
+				child[dashed]{ node [leaf] {0}}
+				child[solid]{ node [leaf] {1}}
+			}
+			child[solid]{ node [state] {$z$}
+				child[dashed]{ node [leaf] {0}}
+				child[solid]{ node [leaf] {1}}
+			}
+		}
+		; 
+		
+		\end{tikzpicture}
+		\caption{Albero di decisione relativo alla funzione logica $(x \vee y) \wedge z$}
+		\label{fig:albero}
+	\end{figure}
+	
+	\begin{figure}
+		\center
+		\begin{tikzpicture}[->, auto, node distance=1.5cm and 1.5cm, on grid, semithick, state/.style={circle, solid, draw, black, minimum width=0.75cm}, leaf/.style={rectangle, solid, draw, black, minimum size=0.75cm}]
+		\node[state] (x1) []{$x$};
+		\node[state] (y1) [below left= of x1]{$y$};
+		\node[state] (z1) [below right= of y1]{$z$};
+		\node[leaf] (true1) [below= of z1]{1};
+		\node[leaf] (false1) [left= of true1]{0};
+		
+		\path (x1) edge[dashed] (y1);
+		\path (x1) edge (z1);
+		\path (y1) edge (z1);
+		\path (z1) edge (true1);
+		\path (z1) edge[dashed] (false1);
+		\path (y1) edge[dashed] (false1);
+		\end{tikzpicture}
+		\caption{Binary decision diagram relativo alla funzione logica $(x \vee y) \wedge z$}
+		\label{fig:bdd}
+	\end{figure}
+	
+	La costruzione di un BDD a partire dall'albero di decisione avviene attraverso le seguenti operazioni:
+	\begin{enumerate}
+		\item le foglie con lo stesso valore sono collassate;
+		\item i nodi isomorfi sono collassati;
+		\item i nodi ridondanti (dove sia il figlio vero che il figlio falso coincidono) sono eliminati.
+	\end{enumerate}
+	
+	Nei BDD vale la \emph{legge di Shannon}, che permette di espandere ricorsivamente la funzione logica in due sotto-BDD:
+	\begin{equation*}
+		f_A = (\neg x \wedge f_{A|x=0}) \vee (x \wedge f_{A|x=1}),
+	\end{equation*}
+	dove $f_A$ \`e la funzione logica di partenza, $A|x=1$ \`e il sotto-BDD di $A$ costruito a partire dal figlio vero della variabile $x$ e, analogamente, $A|x=0$ rappresenta il sotto-BDD costruito a partire dal figlio falso.
+	Tale espansione permette di combinare pi\`u BDD tramite \emph{operatori logici}, ottenendo una funzione logica (e quindi un BDD) pari alla combinazione delle funzioni di partenza.
+	Per la logica dei predicati valgono le seguenti espansioni:
+	\begin{align*}
+		\neg f_A &= \neg x \wedge f_{A|x=1} \vee x \wedge f_{A|x=0}\\
+		f_A \odot f_B &= \neg x \wedge (f_{A|x=0} \odot f_{B|x=0}) \vee x \wedge (f_{A|x=1} \odot f_{B|x=1})\\
+		\exists x f_A &= f_{A|x=0} \vee f_{A|x=1}.
+	\end{align*}
+	
+	\`E possibile espandere un BDD per renderlo in grado di rappresentare funzioni con codominio reale ($f(x_1, x_2, \dots, x_n): \mathbb{B}^n \mapsto \mathbb{R}$), semplicemente inserendo una foglia per ogni valore mappato del codominio. La struttura cos\`i estesa prende il nome di \emph{multi terminal binary decision diagram} (MTBDD).
+	Le operazioni applicabili sugli MTBDD sono estese a tutti gli operatori \emph{algebrici}.
+	
+	Associando un identificatore intero ad ogni stato di una CTMC e utilizzando una funzione che ne rappresenta una codifica binaria di qualche tipo (ad esempio naturale, $101 \mapsto 5$, di Gray, $111 \mapsto 5$, o di altro tipo), \`e possibile rappresentare lo spazio degli stati con $n$ variabili booleane.
+	Utilizzando tale codifica, la matrice delle transizioni $\mathbf{R} : \mathbb{S} \times \mathbb{S} \mapsto \mathbb{R}$ diventa una funzione booleana $\mathbf{R} : \mathbb{B}^n \times \mathbb{B}^n \mapsto \mathbb{R} = \mathbb{B}^{2n} \mapsto \mathbb{R}$, codificabile da un MTBDD~\cite{mtbdd}.
+
+	I motori simbolici di PRISM, tuttavia, risparmiano memoria generando l'MTBDD direttamente a partire dal modello, senza passare dalla CTMC intermedia.
+	L'MTBDD relativo all'intero modello \`e costruito come somma degli MTBDD dei singoli moduli e ognuno di essi codifica una funzione logica con dominio costituito da variabili di riga (stato di partenza), variabili di colonna (stato di destinazione) e variabili logiche che codificano le variabili PRISM locali al modulo.
+	
+	Dopo la costruzione dell'MTBDD, vengono eliminati tutti gli stati non raggiungibili a partire dallo stato iniziale.
+	Tale operazione riduce la regolarit\`a dell'MTBDD, aumentandone purtroppo il numero di nodi, tuttavia ci\`o si riflette, generalmente, in una maggiore efficienza del model checking (che fa uso degli stessi algoritmi descritti nel caso tradizionale, con il vantaggio di un numero di stati inferiore)~\cite{parker2003implementation}.

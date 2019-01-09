@@ -1,0 +1,14 @@
+*~
+*-blx.bib
+*.xml
+figure.pdf
+*.gz
+*.aux
+*.bbl
+*.blg
+*.lof
+*.log
+*.lot
+*.out
+*toc
+sorgenti/*.aux

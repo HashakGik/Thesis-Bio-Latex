@@ -1,0 +1,44 @@
+\chapter{Conclusioni}\label{cap:conclusioni}
+	\section{Lavoro svolto}
+	In questa tesi \`e stato descritto un approccio formale per l'analisi \emph{in silico} di reti metaboliche.
+	Sono stati presentati strumenti matematici in grado di descrivere fedelmente con un modello ogni aspetto di un metabolismo generico, con particolare enfasi su catene di Markov a tempo continuo, algebre dei processi e logiche temporali, e le tecniche per utilizzare tali modelli tramite simulazioni e verifiche formali.
+	
+	\`E stata proposta un'applicazione di tale approccio allo studio della deficienza GAMT e di una cura in fase sperimentale, utilizzando gli strumenti software Bio-PEPA e PRISM.
+	La cura presa in esame utilizza eritrociti ingegnerizzati da un apparato noto come Red Cell Loader per incapsulare l'enzima guanidinoacetato metiltransferasi allo scopo di sopperire alla mancanza della GAMT epatica dei pazienti affetti.
+	Essendo la sperimentazione \emph{in vitro} non ancora completata, l'analisi \emph{in silico} proposta in questa tesi si \`e rivelata utile a indirizzare gli esperimenti futuri.
+	
+	Pi\`u in dettaglio, l'analisi simulativa effettuata ha dimostrato la necessit\`a di incapsulare, oltre alla GAMT, anche S-adenosil metionina sintasi clonata da \emph{E.\ coli}, al fine di sopperire alla scarsa affinit\`a della SAMS ematica e che porterebbe a un limitato effetto terapeutico, a causa della poca S-adenosil metionina a disposizione all'interno degli eritrociti.
+	La verifica formale ha dimostrato che, una volta incapsulate sia SAMS che GAMT, non c'\`e rischio che il bioreattore costituito dagli eritrociti smetta di funzionare entro poche ore dall'infusione per esaurimento di S-adenosil metionina.
+	
+	\section{Necessit\`a di un approccio formale integrato}
+		L'approccio simulativo:
+		\begin{itemize}
+			\item [$+$] \`e ampiamente diffuso grazie alla sua semplicit\`a di utilizzo;
+			\item [$+$] \`e computazionalmente semplice, quindi produce risultati in tempi rapidi;
+			\item [$+$] richiede un numero di risorse limitato;
+			\item [$-$] non \`e in grado di catturare tutti i comportamenti del sistema in maniera esaustiva;
+			\item [$-$] pu\`o accumulare errori in simulazioni particolarmente lunghe;
+			\item [$-$] richiede una media di pi\`u simulazioni per aumentare la precisione;
+			\item [$-$] \`e sensibile al tempo da simulare, aumentando le risorse richieste proporzionalmente al tempo;
+			\item [$-$] rende difficile l'analisi di casi particolari, che potrebbero addirittura passare inosservati se non sono noti a priori.
+		\end{itemize}
+		
+		L'approccio basato su verifica:
+		\begin{itemize}
+			\item [$+$] analizza esaustivamente tutti i comportamenti del sistema, rilevando anche casi particolari non noti a priori;
+			\item [$+$] \`e esente da errori di approssimazione;
+			\item [$+$] \`e computazionalmente indipendente dal limite temporale imposto per la soddisfacibilit\`a delle propriet\`a, richiedendo le stesse risorse per una propriet\`a istantanea o che dovr\`a verificarsi dopo miliardi di operazioni;
+			\item [$-$] \`e poco diffuso a causa della sua difficolt\`a di utilizzo;
+			\item [$-$] \`e computazionalmente complesso, richiedendo tempi elevati per ottenere un esito;
+			\item [$-$] \`e avido di risorse, a meno dell'utilizzo di tecniche simboliche, non sempre efficaci;
+		\end{itemize}
+		
+		Risulta quindi utile (se non auspicabile) utilizzare un approccio che integri sia la componente simulativa che quella basata su verifica.
+		I formalismi di modellazione si prestano agevolmente ad entrambi gli approcci e la visione d'insieme fornita \`e spesso in grado di rivelare caratteristiche non osservabili con uno solo dei due approcci.
+		
+	\section{Sviluppi futuri}
+	Relativamente al caso di studio presentato, si prospetta la necessit\`a di verificare la fedelt\`a delle simulazioni con gli esperimenti che verranno effettuati in futuro.
+	Inoltre non \`e esclusa la possibilit\`a di investigare in maniera formale nuovi aspetti che verranno portati alla luce dai nuovi esperimenti.
+	
+	Per poter verificare le propriet\`a non modellabili dall'engine explicit di PRISM, pu\`o essere interessante introdurre approssimazioni che rendano i modelli di dimensione sufficientemente bassa da permettere la verifica tramite engine hybrid.
+	In alternativa, quando l'engine explicit sar\`a in uno stato pi\`u maturo, potr\`a rivelarsi utile ripetere la verifica sui modelli non approssimati.

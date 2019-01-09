@@ -1,0 +1,291 @@
+\chapter{Model checking del trattamento della deficienza GAMT}\label{cap:modelchecking}
+In questo capitolo vengono descritte le difficolt\`a tecniche riscontrate durante il model checking (sez. \ref{sez:limiti}), le propriet\`a CSL verificate sui modelli PRISM e l'esito del model checking per ognuna di esse (sez. \ref{sez:propepa} per le propriet\`a generate da Bio-PEPA e sez. \ref{sez:propcustom} per le propriet\`a definite manualmente).
+
+\section{Limiti e requisiti del model checking}\label{sez:limiti}
+Poich\'e la sperimentazione del trattamento per la deficienza GAMT \`e ancora in fase iniziale, le simulazioni si sono rivelate sufficienti a riprodurre gli esperimenti effettuati.
+Sebbene possa essere interessante confrontare gli esiti simulativi con quelli di verifica formale, l'elevata dimensione del modello rende impraticabile tale confronto.
+
+In termini predittivi, risulta di particolare interesse un'analisi di tipo prestazionale, che identifichi le reazioni limitanti della via metabolica, e di tipo temporale, per valutare l'efficacia della terapia.
+Oltre a tali propriet\`a, pu\`o essere interessante, a scopo didattico, verificare le propriet\`a predefinite da Bio-PEPA, le quali pur essendo di tipo quantitativo, tuttavia non forniscono informazioni aggiuntive rispetto alle simulazioni.
+
+I modelli PRISM, generati a partire dal modello Bio-PEPA, vengono convertiti in CTMC di dimensioni intrattabili per un personal computer.
+Si \`e pertanto tentato di costruire le CTMC in macchine via via pi\`u ricche di memoria principale:
+\begin{itemize}
+	\item macchina virtuale con \SI{4}{GB} di RAM,
+	\item macchina fisica con \SI{16}{GB} di RAM,
+	\item server virtuale con \SI{64}{GB} di RAM,
+	\item server virtuale con \SI{128}{GB} di RAM.
+\end{itemize}
+Utilizzando l'engine \emph{hybrid} (model checking ibrido) sul modello \ref{mod:14}, le prime tre macchine non sono riuscite a portare a termine la costruzione del modello, andando in crash per memoria insufficiente.
+La quarta \`e invece riuscita a costruire un MTBDD da \SI{94}{GB} in 7325.603 secondi, costituito da 38814405 nodi (di cui 409378 raggiungibili), equivalente a una CTMC con 42156649 stati e 125726277 transizioni, ma si \`e dovuto interrompere il calcolo dopo circa quindici giorni di blocco.
+
+Un tentativo con l'engine \emph{explicit} (model checking tradizionale) si \`e rivelato pi\`u fruttuoso, costruendo la matrice delle transizioni da \SI{71}{GB} in 699.519 secondi.
+Tuttavia non \`e attualmente supportata la verifica di propriet\`a allo steady state (contenenti gli operatori $\mathbb{S}$ o $\mathbb{R}[\mathcal{S}]$) o contenenti operatori innestati (ad esempio $\mathcal{F} \mathcal{G} \phi$) per l'engine explicit.
+
+\section{Propriet\`a generate da Bio-PEPA}\label{sez:propepa}
+Relativamente al trattamento per la deficienza GAMT, sono stati generati automaticamente da Bio-PEPA:
+\begin{itemize}
+	\item reward transitori relativi alle reazioni ($\_sams$, $\_gamt$ e $\_uptake$), utili per contare quante volte avvengono;
+	\item reward stazionari relativi alle specie ($\_SAM$, $\_SAH$, $\_GAA\_INT$, $\_GAA\_EXT$ e $\_CR$), che permettono di quantificarle;
+	\item reward quadratici (ad esempio $\_SAM\_squared = \_SAM^2$), utili per il calcolo di varianze e scarti quadratici;
+	\item reward basati sui contatori definiti ($\_UM\_SAM = \_SAM / 10$, $\_UM\_SAH = \_SAH / 10$, $\_UM\_GAA\_EXT = \_GAA\_EXT / 10$, $\_UM\_GAA\_INT = \_GAA\_INT / 10$ e $\_UM\_CR = \_CR / 10$).
+\end{itemize}
+
+Sono stati inoltre generati i predicati:
+\begin{itemize}
+	\item specie al massimo (ad esempio $\_SAM\_at\_maximum: \_SAM = MAX$), che rendono pi\`u leggibili le propriet\`a relative alla saturazione della specie;
+	\item specie esaurite (ad esempio $\_SAM\_depleted: \_SAM = 0$), che rendono pi\`u leggibili le propriet\`a relative all'esaurimento.
+\end{itemize}
+
+La variabile $MAX$ \`e definita, nei modelli PRISM, come la somma di tutte le quantit\`a iniziali, per evitare di generare modelli infiniti.
+Vengono generate altre tre variabili, nel file di propriet\`a, da inizializzare a valori arbitrari prima della verifica formale:
+\begin{itemize}
+	\item $T$ istante temporale;
+	\item $i$ quantit\`a di una specie;
+	\item $rew$ reward generico.
+\end{itemize}
+Vista la ridotta quantit\`a di informazioni aggiuntive ottenibili, rispetto alle simulazioni, dalle propriet\`a predefinite sono state inizializzate le variabili allo stesso valore per ogni propriet\`a: $T = 600$ (10 ore), $i = 10$ (\SI{1}{\mu M}), $rew$ non utilizzata.
+
+Di seguito vengono elencate le propriet\`a, il tempo di verifica e l'esito, relativamente al solo modello \ref{mod:14}, che ha prodotto una CTMC da $42156649$ stati, $125726277$ transizioni e fattore di uniformizzazione pari a $17.4583$; il coefficiente d'errore per l'algoritmo di Fox-Glynn \`e pari a $1.25 \cdot 10^{-7}$.
+I risultati vengono troncati alla quinta cifra decimale.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_SAM=i ]
+\end{equation}
+``Qual \`e la probabilit\`a che ci siano $i$ molecole di S-adenosil metionina al tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 84309.627 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_SAM\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che l'S-adenosil metionina sia satura esattamente al tempo $T$?''\\
+Risultato: 0.92757\\
+Tempo di elaborazione: 57043.331 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{ \leq T} \_SAM\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che l'S-adenosil metionina sia satura entro tempo $T$?''\\
+Risultato: 0.99999\\
+Tempo di elaborazione: 67152.519 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_SAM\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanta S-adenosil metionina \`e presente al tempo $T$?''\\
+Risultato: 584.92193\\
+Tempo di elaborazione: 65439.354 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_SAH=i ]
+\end{equation}
+``Qual \`e la probabilit\`a che ci siano $i$ molecole di S-adenosil omocisteina al tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65624.93 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_SAH\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che l'S-adenosil omocisteina sia satura esattamente al tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65311.243 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{\leq T} \_SAH\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che l'S-adenosil omocisteina sia satura entro tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65306.103 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_SAH\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanta S-adenosil omocisteina \`e presente al tempo $T$?''\\
+Risultato: 345.72163\\
+Tempo di elaborazione: 65339.864.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_GAA\_INT=i ]
+\end{equation}
+``Qual \`e la probabilit\`a che ci siano $i$ molecole di guanidinoacetato intracellulare al tempo $T$?''\\
+Risultato: $2.69092 \cdot 10^{-13}$\\
+Tempo di elaborazione: 65357.881 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_GAA\_INT\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che il guanidinoacetato intracellulare sia saturo esattamente al tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65071.259 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{\leq T} \_GAA\_INT\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che il guanidinoacetato intracellulare sia saturo entro il tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65088.718 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_GAA\_INT\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanto guanidinoacetato intracellulare \`e presente al tempo $T$?''\\
+Risultato: 96.15829\\
+Tempo di elaborazione: 65317.685 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_GAA\_EXT=i ]
+\end{equation}
+``Qual \`e la probabilit\`a che ci siano $i$ molecole di guanidinoacetato plasmatico al tempo $T$?''\\
+Risultato: $4.63631 \cdot 10^{-17}$\\
+Tempo di elaborazione: 66352.333 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_GAA\_EXT\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che il guanidinoacetato plasmatico sia saturo esattamente al tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65089.469 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{\leq T} \_GAA\_EXT\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che il guanidinoacetato plasmatico sia saturo entro tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65337.322 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_GAA\_EXT\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanto guanidinoacetato plasmatico \`e presente al tempo $T$?''\\
+Risultato: 108.12003\\
+Tempo di elaborazione: 66145.619 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_CR=i ]
+\end{equation}
+``Qual \`e la probabilit\`a che ci siano $i$ molecole di creatina al tempo $T$?''\\
+Risultato: $4.09024 \cdot 10^{-161}$\\
+Tempo di elaborazione: 65139.591 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{[T,T]} \_CR\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che la creatina sia satura esattamente al tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65127.878 secondi.
+
+\begin{equation}
+	\mathbb{P}_{=?} [ \mathcal{F}^{\leq T} \_CR\_at\_maximum ]
+\end{equation}
+``Qual \`e la probabilit\`a che la creatina sia satura entro il tempo $T$?''\\
+Risultato: 0\\
+Tempo di elaborazione: 65093.444 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_CR\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanta creatina \`e presente al tempo $T$?''\\
+Risultato: 332.72163\\
+Tempo di elaborazione: 65481.934 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_UM\_SAM\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanta S-adenosil metionina \`e presente al tempo $T$, in $\mu M$?''\\
+Risultato: 58.49219\\
+Tempo di elaborazione: 65468.829 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_UM\_SAH\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanta S-adenosil omocisteina \`e presente al tempo $T$, in $\mu M$?''\\
+Risultato: 34.57216\\
+Tempo di elaborazione: 66046.642 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_UM\_GAA\_INT\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanto guanidinoacetato intracellulare \`e presente al tempo $T$, in $\mu M$?''\\
+Risultato: 9.61583\\
+Tempo di elaborazione: 65381.08 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_UM\_GAA\_EXT\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanto guanidinoacetato plasmatico \`e presente al tempo $T$, in $\mu M$?''\\
+Risultato: 10.812000\\
+Tempo di elaborazione: 65364.411 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_UM\_CR\}=?} [ \mathcal{I}=T ]
+\end{equation}
+``Quanta creatina \`e presente al tempo $T$, in $\mu M$?''\\
+Risultato: 33.27216\\
+Tempo di elaborazione: 65343.736 secondi.
+
+\begin{equation}
+	\mathbb{R}_{\{\_sams\}=?} [ \mathcal{C} \leq T ]
+\end{equation}
+``Quante volte \`e avvenuta la reazione ad opera della SAM sintasi entro il tempo $T$?''\\
+Risultato: N/A\\
+Tempo di elaborazione: N/A\\
+Risultato ottenuto per via simulativa: 882.566.
+
+\begin{equation}
+	\mathbb{R}_{\{\_gamt\}=?} [ \mathcal{C} \leq T ]
+\end{equation}
+``Quante volte \`e avvenuta la reazione ad opera della guanidinoacetato metiltransferasi entro il tempo $T$?''\\
+Risultato: N/A\\
+Tempo di elaborazione: N/A\\
+Risultato ottenuto per via simulativa: 332.971.
+
+\begin{equation}
+	\mathbb{R}_{\{\_uptake\}=?} [ \mathcal{C} \leq T ]
+\end{equation}
+``Quante volte il guanidinoacetato \`e entrato dentro gli eritrociti entro il tempo $T$?''\\
+Risultato: N/A\\
+Tempo di elaborazione: N/A\\
+Risultato ottenuto per via simulativa: 392.443.
+
+\section{Propriet\`a definite}\label{sez:propcustom}
+Di seguito sono descritte propriet\`a pi\`u interessanti di quelle generate automaticamente (anche in questo caso verificate per $T = 600$ e $soglia = 10$).
+
+Essendo l'S-adenosil metionina il reagente limitante, \`e necessario controllare e quantificare i casi in cui l'intera via metabolica vada in \emph{starvation}, bloccando la produzione di creatina:
+\begin{equation}
+\mathbb{P}_{=?} [\mathcal{F} \mathcal{G} \_SAM = 0]
+\end{equation}
+``Qual \`e la probabilit\`a che prima o poi l'S-adenosil metionina si esaurisca e rimanga a zero per sempre?''\\
+Risultato: 0\\
+Tempo di elaborazione: 342.842 secondi.
+
+Anche nei casi in cui l'S-adenosil metionina non si esaurisca, \`e importante quantificare pure eventuali cali prestazionali e capacit\`a di recupero da cali temporanei:
+\begin{equation}
+\mathbb{P}_{=?} [\mathcal{F} \mathcal{G} \_SAM \leq soglia]
+\end{equation}
+``Qual \`e la probabilit\`a che prima o poi l'S-adenosil metionina scenda sotto la $soglia$ e vi rimanga per sempre?''\\
+Risultato: 0\\
+Tempo di elaborazione: 292.23 secondi.
+\begin{equation}
+\mathbb{P}_{=?} [\mathcal{G} (\_SAM = 0 \rightarrow \mathcal{F}^{\leq T} \_SAM > soglia)]
+\end{equation}
+``Qual \`e la probabilit\`a che, se si esaurisce l'S-adenosil metionina, questa riesca sempre a tornare oltre la $soglia$ entro un tempo $T$?''\\
+Risultato: Propriet\`a non verificabile con l'engine explicit, n\'e per via simulativa\\
+Tempo di elaborazione: N/A.
+
+Vista la citotossicit\`a del guanidinoacetato, \`e interessante quantificare eventuali accumuli negli eritrociti (\`e importante tuttavia notare che il modello non rappresenta una possibile fuoriuscita del guanidinoacetato e che quindi l'esito della propriet\`a seguente potrebbe non essere significativo):
+\begin{equation}
+\mathbb{P}_{=?} [\mathcal{F}\mathcal{G}^{\leq T} \_GAA\_INT > soglia]
+\end{equation}
+``Qual \`e la probabilit\`a che il guanidinoacetato intracellulare rimanga sopra la $soglia$ almeno per un tempo $T$?''\\
+Risultato: Propriet\`a non verificabile con l'engine explicit, n\'e per via simulativa\\
+Tempo di elaborazione: N/A.
+
+Per valutare l'efficacia della cura, \`e utile predire il tempo necessario a ripristinare livelli fisiologici di guanidinoacetato nel plasma:
+\begin{equation}
+\mathbb{P}_{=?} [\mathcal{F}^{\leq T} \_GAA\_EXT \leq soglia]
+\end{equation}
+``Qual \`e la probabilit\`a che il guanidinoacetato plasmatico scenda sotto la $soglia$ entro un tempo $T$?''\\
+Risultato: $5.06063 \cdot 10^{-17}$\\
+Tempo di elaborazione: 64474.518 secondi.
+\\\\

@@ -1,0 +1,864 @@
+\chapter{Costruzione del modello per il trattamento della deficienza GAMT}\label{cap:costruzione}
+In questo capitolo viene presentata la fase di descrizione formale del caso di studio, riassumendo brevemente le caratteristiche specifiche del metabolismo (sezione \ref{sez:via}) e mostrando il modello Bio-PEPA (sezione \ref{sez:modpepa}) che lo descrive e i modelli PRISM generati a partire da quest'ultimo (sezione \ref{sez:modprism}).
+
+\section{Via metabolica da modellare}\label{sez:via}
+Riassumendo i dati raccolti nel capitolo \ref{cap:casostudio}, si parte dalla seguente via:
+\begin{align}
+		Arg + Gly &\xrightleftharpoons{AGAT} Orn + GAA\label{eq:agat2}\\
+		Met + ATP &\xrightarrow{SAMS} SAM + P_i + PP_i\label{eq:sams2}\\
+		GAA_{fuori} &\xrightleftharpoons{trasporto} GAA_{dentro}\label{eq:trasporto2}\\
+		GAA_{dentro} + SAM &\xrightarrow{GAMT} Cr + SAH,\label{eq:gamt2}
+\end{align}
+
+Assumendo che la produzione di guanidinoacetato avvenga molto pi\`u lentamente della sua degradazione, si pu\`o astrarre dalla reazione \ref{eq:agat2}, considerando una quantit\`a iniziale di guanidinoacetato libera nel plasma che non viene rifornita.
+Vista l'elevata efficacia dei meccanismi di regolazione, si pu\`o assumere che i metabolismi energetici e di biosintesi riescano a compensare ampiamente l'aumentato fabbisogno di metionina e ATP degli eritrociti, di conseguenza si possono assumere livelli costanti di questi ultimi nella reazione \ref{eq:sams2}.
+L'equilibrio della reazione \ref{eq:trasporto2} risulta essere spostato verso i prodotti, a causa del sequestro immediato del guanidinoacetato intracellulare ad opera della reazione \ref{eq:gamt2}, di conseguenza \`e possibile semplificare la reazione rendendola unidirezionale (uptake).
+
+Le cinetiche coinvolte nelle tre reazioni rimaste sono:
+\begin{labeling}{trasporto}
+	\item [SAMS] catalisi con formazione di complessi ternari ad ordine di associazione obbligata, inibita da S-adenosil metionina;
+	\item [GAMT] catalisi con formazione di complessi ternari ad ordine di associazione obbligata, inibita da S-adenosil omocisteina;
+	\item [trasporto] diffusione passiva attraverso la membrana, dal plasma, verso l'interno degli eritrociti (equazione \ref{eq:diffusione}).
+\end{labeling}
+
+Per limitare l'esplosione dello spazio degli stati del modello, \`e necessario eliminare tutto ci\`o che non \`e rilevante ai fini delle cinetiche (ad eccezione della creatina, di cui \`e richiesta la quantificazione), di conseguenza le reazioni sono semplificate come segue:
+\begin{align}
+	Met_{costante} + ATP_{costante} &\xrightarrow{SAMS} SAM\label{eq:sams3}\\
+	GAA_{fuori} &\xrightarrow{uptake} GAA_{dentro}\label{eq:uptake3}\\
+	GAA_{dentro} + SAM &\xrightarrow{GAMT} Cr + SAH\label{eq:gamt3}.
+\end{align}
+
+\subsection{Cinetiche di reazione}
+Per modellare fedelmente il caso di studio, \`e necessario ricavare le velocit\`a a cui dovranno avvenire le azioni che modellano le reazioni precedentemente descritte.
+Di seguito vengono ricavate le cinetiche utili alla modellazione del caso di studio.
+
+\subsubsection{Catalisi enzimatica con formazione di complessi ternari}
+Gli enzimi che catalizzano le reazioni \ref{eq:sams3} e \ref{eq:gamt3} sono nella forma:
+\begin{equation*}
+	A + B \xrightarrow{E} P + Q,
+\end{equation*}
+	che costituisce in realt\`a una rappresentazione astratta (che considera solo gli istanti iniziale e finale, ignorando i passaggi intermedi) della sequenza di reazioni pi\`u complessa:
+\begin{align*}
+	E + A &\rightleftharpoons EA\\
+	EA + B &\rightleftharpoons EAB\\
+	EAB &\rightarrow EPQ\\
+	EPQ &\rightleftharpoons EQ + P\\
+	EQ &\rightleftharpoons E + Q,
+\end{align*}
+	dove i due substrati $A$ e $B$ sono convertiti nei due prodotti $P$ e $Q$ ed \`e possibile un solo ordine di associazione (prima si forma il complesso binario $EA$ e poi quello ternario $EAB$, analogamente, prima si dissocia il prodotto $P$ e poi quello $Q$).
+	
+	Ai fini del calcolo della cinetica, risulta essere pi\`u conveniente ragionare sui singoli passi della reazione, anzich\'e sulla rappresentazione astratta. Una volta ricavata l'equazione della cinetica, si pu\`o applicare quest'ultima direttamente alla reazione astratta, per semplificare il modello.
+
+Utilizzando metodi come quello di King-Altman~\cite{king1956schematic}, che semplificano il calcolo della cinetica nonostante l'elevato numero di reazioni coinvolte, si ottiene l'equazione:
+\begin{equation}\label{eq:michaelistern}
+v =  \frac{\frac{V_{max}}{km_B + [B]} \cdot [A]}{\frac{ki \cdot km_B + km_A \cdot [B]}{km_B + [B]} + [A]}.
+\end{equation}
+Risulta evidente che:
+\begin{align*}
+	V^{app}_{max} &= \frac{V_{max}}{km_B + [B]}\\
+	K^{app}_M &= \frac{ki \cdot km_B + km_A \cdot [B]}{km_B + [B]},
+\end{align*}
+dove $k_i$ indica un'eventuale costante di inibizione, $km_A$ e $km_B$ indicano le affinit\`a dell'enzima rispetto ad $A$ e $B$, rispettivamente, e $V_{max}$ indica la velocit\`a massima dell'enzima.
+
+Come precedentemente affermato, la funzione \ref{eq:michaelistern} definisce l'andamento della velocit\`a delle reazioni catalizzate da SAMS e GAMT.
+
+\begin{figure}
+	\center
+	\begin{tikzpicture}
+	\begin{axis}[xmin=0, xmax=20, ymin=0, ymax=1.1,domain=0:20,samples=100, xtick={1}, xticklabels={$K_m$}, ytick={0.5,1}, yticklabels={$\frac{V_{max}}{2}$, $V_{max}$}, xlabel={$[S]$}, ylabel={$v$}]
+	\addplot[black]{x/(1+x)};
+	\addplot[black, dashed]{1};
+	\path[draw=black, dashed] (10, 50) -- (10, 0);
+	\end{axis}
+	\end{tikzpicture}
+	\caption{Andamento della velocit\`a di reazione in funzione della concentrazione di substrato in un enzima di Michaelis-Menten}
+	\label{fig:michaelis}
+\end{figure}
+
+\section{Modello Bio-PEPA}\label{sez:modpepa}
+Il modello Bio-PEPA per il trattamento della deficienza GAMT a base di eritrociti ingegnerizzati, prodotto a partire dalle reazioni \ref{eq:sams3}, \ref{eq:uptake3} e \ref{eq:gamt3}, \`e il seguente:
+\begin{align}
+	sams &= \left [10 \cdot \frac{\frac{v\_sams}{km\_sams\_atp + atp} \cdot met}{\frac{ki\_sams\_sam \cdot km\_sams\_atp + km\_sams\_met \cdot atp}{km\_sams\_atp + atp} + met} \right ];\nonumber\\
+	gamt &= \left [10 \cdot \frac{\frac{v\_gamt}{km\_gamt\_sam + \frac{SAM}{10}} \cdot \frac{GAA\_INT}{10}}{\frac{ki\_gamt\_sah \cdot km\_gamt\_sam + km\_gamt\_gaa\_int \cdot \frac{SAM}{10}}{km\_gamt\_sam + \frac{SAM}{10}} + \frac{GAA\_INT}{10}}\right ];\nonumber\\
+	uptake &= \left [v\_uptake \cdot \frac{GAA\_EXT - GAA\_INT}{10} \right ];\nonumber\\
+	UM\_SAM &= \left [\frac{SAM}{10}\right ];\nonumber\\
+	UM\_SAH &= \left [\frac{SAH}{10}\right ];\nonumber\\
+	UM\_GAA\_INT &= \left [\frac{GAA\_INT}{10}\right ];\nonumber\\
+	UM\_GAA\_EXT &= \left [\frac{GAA\_EXT}{10}\right ];\nonumber\\
+	UM\_CR &= \left [\frac{CR}{10}\right ];\label{mod:rate}
+\end{align}
+\begin{align}
+	SAM &= sams \uparrow SAM + gamt \downarrow SAM;\nonumber\\
+	SAH &= gamt \uparrow SAH;\nonumber\\
+	GAA\_INT &= uptake \uparrow GAA\_INT + gamt \downarrow GAA\_INT;\nonumber\\
+	GAA\_EXT &= uptake \downarrow GAA\_EXT;\nonumber\\
+	CR &= gamt \uparrow CR;\label{mod:cost}
+\end{align}
+\begin{equation}
+(SAM \underset{gamt}{\bowtie} SAH \underset{gamt}{\bowtie} GAA\_INT \underset{gamt}{\bowtie} CR)\underset{uptake}{\bowtie} GAA\_EXT.\label{mod:sincr}
+\end{equation}
+
+La porzione \ref{mod:rate} descrive rate e contatori definiti sul modello.
+I rate sono associati alle tre azioni definite, che coincidono con le reazioni da modellare, ognuno \`e definito in base alla cinetica coinvolta ed \`e espresso in $10^{-7}$ $M \cdot min^{-1}$ (mentre le costanti sono definite in $\mu M$ e $\mu M \cdot min^{-1}$, motivo per cui \`e necessario includere fattori di conversione).
+I contatori sono utilizzati per convertire le concentrazioni delle specie chimiche del modello in $\mu M$.
+
+Le costanti di processo sono definite nella porzione \ref{mod:cost} e ognuna rappresenta il comportamento di ogni specie chimica, osservata in aliquote da $10^{-7}$ $M$.
+Il comportamento dei processi \`e definito in termini di aumenti e diminuzioni a seguito di ogni reazione.
+Il processo $SAM$, ad esempio, pu\`o aumentare a seguito della partecipazione alla reazione \ref{eq:sams3} (catalizzata da SAMS), oppure diminuire partecipando alla reazione \ref{eq:gamt3} (catalizzata da GAMT).
+
+Il modello vero e proprio \`e costituito dalla porzione \ref{mod:sincr}, che sincronizza tutti i processi. La semantica dell'operatore di composizione parallela modella fedelmente il comportamento reale, poich\'e ogni reazione \`e costituita dalla trasformazione simultanea di tutte le specie coinvolte, ma, allo stesso tempo, due specie non coinvolte nella stessa reazione possono trasformarsi indipendentemente l'una dall'altra.
+Essendo il risultato della composizione di due processi un nuovo processo, \`e possibile costruire il modello incrementalmente, sincronizzando man mano le singole specie, si pu\`o dunque immaginare la porzione \ref{mod:sincr} costruita come:
+\begin{enumerate}
+	\item $SAM$ e $SAH$ sincronizzati in un unico processo $reagenti\_gamt$;
+	\item $GAA\_INT$ e $CR$ sincronizzati nel processo $prodotti\_gamt$;
+	\item $reagenti\_gamt$ e $prodotti_gamt$ sincronizzati nel processo $reazione\_gamt$ (dove l'azione $gamt$ non richiede ulteriori sincronizzazioni, dato che tutti i processi che la utilizzano sono stati accorpati);
+	\item $reazione\_gamt$ e $GAA\_EXT$ sincronizzati nel modello completo (dato che l'azione $uptake$ va sincronizzata solo tra $GAA\_INT$, che \`e incluso in $reazioni\_gamt$ e $GAA\_EXT$ e dato che l'azione $sams$ non ha bisogno di sincronizzazioni, essendo eseguita dal solo processo $SAM$).
+	
+\end{enumerate}
+
+Dallo stesso modello \`e possibile analizzare diversi aspetti della terapia semplicemente modificando il valore delle quantit\`a iniziali e delle costanti. Le tabelle seguenti indicano i parametri utilizzati per ogni analisi.
+
+\subsection{Ingresso di guanidinoacetato negli eritrociti}
+In questa serie di istanze del modello si replica l'esperimento descritto nella sezione \ref{sez:uptake}, per validare la fedelt\`a del modello rispetto ai dati sperimentali.
+Di queste istanze verr\`a fatto un utilizzo esclusivamente simulativo.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+	\hline
+	$SAM$ & $0$ & \si{10^{-7} M} & \\
+	\hline
+	$SAH$ & $0$ & \si{10^{-7} M} & \\
+	\hline
+	$GAA\_INT$ & $5$ & \si{10^{-7} M} & valore sperimentale \\
+	\hline
+	$GAA\_EXT$ & $100$ & \si{10^{-7} M} & valore sperimentale \\
+	\hline
+	$CR$ & $0$ & \si{10^{-7} M} & \\
+	\hline
+	$met$ & $0$ & \si{\mu M} & \\
+	\hline
+	$atp$ & $0$ & \si{\mu M} & \\
+	\hline
+	$v\_sams$ & $0$ & \si{\mu M / min} & \\
+	\hline
+	$v\_gamt$ & $0$ & \si{\mu M / min} & \\
+	\hline
+	$km\_sams\_atp$ & $0$ & \si{\mu M} & \\
+	\hline
+	$km\_sams\_met$ & $0$ & \si{\mu M} & \\
+	\hline
+	$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+	\hline
+	$km\_gamt\_sam$ & $0$ & \si{\mu M} & \\
+	\hline
+	$km\_gamt\_gaa\_int$ & $0$ & \si{\mu M} & \\
+	\hline
+	$ki\_gamt\_sah$ & $0$ & \si{\mu M} & \\
+	\hline
+	$v\_uptake$ & $0.02$ & \si{\mu M/min} & valore sperimentale \\
+	\hline
+\end{tabular}
+\caption{Esperimento di uptake con \SI{10}{\mu M} di guanidinoacetato extracellulare}
+\label{mod:1}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $12$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$GAA\_EXT$ & $250$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $0$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $0$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $0$ & \si{\mu M / min} & \\
+		\hline
+		$v\_gamt$ & $0$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $0$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $0$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di uptake con \SI{25}{\mu M} di guanidinoacetato extracellulare}
+	\label{mod:2}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $25$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $0$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $0$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $0$ & \si{\mu M / min} & \\
+		\hline
+		$v\_gamt$ & $0$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $0$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $0$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di uptake con \SI{50}{\mu M} di guanidinoacetato extracellulare}
+	\label{mod:3}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $52$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$GAA\_EXT$ & $1000$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $0$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $0$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $0$ & \si{\mu M / min} & \\
+		\hline
+		$v\_gamt$ & $0$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $0$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $0$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di uptake con \SI{100}{\mu M} di guanidinoacetato extracellulare}
+	\label{mod:4}
+\end{table}
+
+\subsection{Sintesi di creatina in eritrociti incapsulati con SAM esogena}
+In questa serie di istanze del modello si replica l'esperimento descritto nella sezione \ref{sez:dosaggio}, per validare la fedelt\`a del modello rispetto ai dati sperimentali.
+Anche queste istanze verranno sottoposte esclusivamente ad analisi simulativa.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $100$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \cite{oden1983s} \\
+		\hline
+		$GAA\_INT$ & $660$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$GAA\_EXT$ & $1000$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$CR$ & $26$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$met$ & $12$ & \si{\mu M} &\cite{oden1983s} \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \cite{oden1983s} \\
+		\hline
+		$v\_sams$ & $0.033$ & \si{\mu M / min} & \cite{kim1974s} \\
+		\hline
+		$v\_gamt$ & $33$ & \si{\mu M / min} & valore sperimentale \\
+		\hline
+		$km\_sams\_atp$ & $80$ & \si{\mu M} & \cite{oden1983s} \\
+		\hline
+		$km\_sams\_met$ & $2$ & \si{\mu M} & \cite{oden1983s} \\
+		\hline
+		$ki\_sams\_sam$ & $2$ & \si{\mu M} & \cite{oden1983s} \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \cite{ilas2000guanidinoacetate} \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \cite{ilas2000guanidinoacetate} \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} &\cite{brendagamt} \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{10}{\mu M} di S-adenosil metionina incapsulata}
+	\label{mod:5}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $500$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $663$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$GAA\_EXT$ & $1000$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $73$ & \si{10^{-7} M} & valore sperimentale \\
+		\hline
+		$met$ & $12$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $0.033$ & \si{\mu M / min} & \\
+		\hline
+		$v\_gamt$ & $33$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $80$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $2$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $2$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{50}{\mu M} di S-adenosil metionina incapsulata}
+	\label{mod:6}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \cite{oden1983s} \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $598$ & \si{10^{-7} M} &  valore sperimentale \\
+		\hline
+		$GAA\_EXT$ & $1000$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $1$ & \si{10^{-7} M} &  valore sperimentale \\
+		\hline
+		$met$ & $12$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $0.033$ & \si{\mu M / min} & \\
+		\hline
+		$v\_gamt$ & $0$ & \si{\mu M / min} & non incapsulata \\
+		\hline
+		$km\_sams\_atp$ & $80$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $2$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $2$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di controllo della sintesi della creatina con S-adenosil metionina endogena}
+	\label{mod:7}
+\end{table}
+
+\subsection{Predizione della sintesi di creatina in eritrociti incapsulati con SAM sintasi di \emph{E.\ coli}}
+In questa serie di istanze del modello si prevede l'andamento di esperimenti non ancora effettuati, dove si valuta la quantit\`a di SAM sintasi di \emph{E.\ coli} (con affinit\`a e costanti di equilibrio diverse rispetto a quella eritrocitaria, usata come controllo) da incapsulare per fare in modo che l'S-adenosil metionina non sia il reagente limitante del metabolismo.
+Queste istanze verranno utilizzate sia per l'applicazione delle tecniche simulative che di verifica.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & livelli patologici~\cite{kikuchi1981liquid} \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & concentrazione massima ipotizzata \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $12$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $0.033$ & \si{\mu M / min} & \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & assumendo un incapsulamento del \\&&&30\% circa di \SI{1}{mg/ml} \\
+		\hline
+		$km\_sams\_atp$ & $2$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $80$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $2$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di controllo della sintesi della creatina con SAM sintasi endogena}
+	\label{mod:8}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $20$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $20$ & \si{\mu M / min} & \cite{brendasams}, \SI{0.05}{mg} incapsulati \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $73$ & \si{\mu M} & \cite{brendasams} \\
+		\hline
+		$km\_sams\_met$ & $75$ & \si{\mu M} & \cite{brendasams} \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \cite{brendasams} \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{0.05}{mg} di SAM sintasi di \emph{E.\ coli} incapsulati}
+	\label{mod:9}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $20$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $40$ & \si{\mu M / min} & \SI{0.1}{mg} incapsulati \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $73$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $75$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{0.1}{mg} di SAM sintasi di \emph{E.\ coli} incapsulati}
+	\label{mod:10}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $20$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $200$ & \si{\mu M / min} & \SI{0.5}{mg} incapsulati \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $73$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $75$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{0.5}{mg} di SAM sintasi di \emph{E.\ coli} incapsulati}
+	\label{mod:11}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $20$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $400$ & \si{\mu M / min} & \SI{1}{mg} incapsulati \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $73$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $75$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{1}{mg} di SAM sintasi di \emph{E.\ coli} incapsulati}
+	\label{mod:12}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $20$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $1000$ & \si{\mu M / min} & \SI{2.5}{mg} incapsulati \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $73$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $75$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{2.5}{mg} di SAM sintasi di \emph{E.\ coli} incapsulati}
+	\label{mod:13}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+	\hline
+	Parametro & Valore & Unit\`a & Note \\
+		\hline
+		$SAM$ & $35$ & \si{10^{-7} M} & \\
+		\hline
+		$SAH$ & $13$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_INT$ & $37$ & \si{10^{-7} M} & \\
+		\hline
+		$GAA\_EXT$ & $500$ & \si{10^{-7} M} & \\
+		\hline
+		$CR$ & $0$ & \si{10^{-7} M} & \\
+		\hline
+		$met$ & $20$ & \si{\mu M} & \\
+		\hline
+		$atp$ & $1100$ & \si{\mu M} & \\
+		\hline
+		$v\_sams$ & $2000$ & \si{\mu M / min} & \SI{5}{mg} incapsulati \\
+		\hline
+		$v\_gamt$ & $15$ & \si{\mu M / min} & \\
+		\hline
+		$km\_sams\_atp$ & $73$ & \si{\mu M} & \\
+		\hline
+		$km\_sams\_met$ & $75$ & \si{\mu M} & \\
+		\hline
+		$ki\_sams\_sam$ & $0$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_sam$ & $14.8$ & \si{\mu M} & \\
+		\hline
+		$km\_gamt\_gaa\_int$ & $78$ & \si{\mu M} & \\
+		\hline
+		$ki\_gamt\_sah$ & $0.4$ & \si{\mu M} & \\
+		\hline
+		$v\_uptake$ & $0.02$ & \si{\mu M/min} & \\
+		\hline
+	\end{tabular}
+	\caption{Esperimento di sintesi della creatina con \SI{5}{mg} di SAM sintasi di \emph{E.\ coli} incapsulati}
+	\label{mod:14}
+\end{table}
+
+\section{Modelli PRISM}\label{sez:modprism}
+I modelli PRISM compilati a partire dalle istanze del modello Bio-PEPA per effettuare l'analisi sono tutti della stessa forma, cambiando soltanto le costanti definite a inizio file e le quantit\`a iniziali dei moduli.
+
+Per semplicit\`a viene mostrato un unico modello parametrizzato, indicando in corsivo gli identificatori Bio-PEPA con cui sostituire i parametri (ad esempio, nel modello \ref{mod:1} \`e necessario sostituire $met$ con $0$, nel modello \ref{mod:5} con $12$ e cos\`i via).
+Per ragioni di spazio, le cinetiche sono indicate con $sams$, $gamt$ e $uptake$ (anzich\'e con le formule gi\`a indicate nel modello Bio-PEPA), sebbene siano le stesse per ogni modello.
+
+In questo modello parametrico vengono definiti un modulo per ogni specie (dove nel caso di un aumento viene controllato che non sia raggiunta la saturazione e nel caso di una diminuzione viene controllato che la specie non sia esaurita), e un modulo complessivo per tutti i rate.
+Vengono inoltre definite tutte le strutture di reward che verranno utilizzate per l'analisi e che corrispondono al numero di reazioni effettuate, alla quantit\`a di ogni substrato, al quadrato della quantit\`a e ai contatori Bio-PEPA definiti.
+
+\begin{lstlisting}[mathescape=true,language=prism]
+ctmc
+	const double _met = $met$;
+	const double _atp = $atp$;
+	const double _v_sams = $v\_sams$;
+	const double _v_gamt = $v\_gamt$;
+	const double _km_sams_atp = $km\_sams\_atp$;
+	const double _km_sams_met = $km\_sams\_met$;
+	const double _ki_sams_sam = $ki\_sams\_sam$;
+	const double _km_gamt_sam = $km\_gamt\_sam$;
+	const double _km_gamt_gaa_int = $km\_gaa\_int$;
+	const double _ki_gamt_sah = $km\_gamt\_sah$;
+	const double _v_uptake = $v\_uptake$;
+	
+	module Rates
+		[_sams] $sams$ : true;
+		[_gamt] $gamt$ : true;
+		[_uptake] $uptake$ : true;
+	endmodule
+	
+	const int MAX = $SAM$ + $SAH$ + $GAA\_INT$ + $GAA\_EXT$ + $CR$;
+	
+	module _SAM
+		_SAM : [0..MAX] init $SAM$;
+		[_sams] (_SAM + 1 $\leq$ MAX) $\rightarrow$ 1 : (_SAM' = _SAM + 1);
+		[_gamt] (_SAM $\geq$ 1) $\rightarrow$ 1 : (_SAM' = _SAM - 1);
+	endmodule
+	
+	module _SAH
+		_SAH : [0..MAX] init $SAH$;
+		[_gamt] (_SAH + 1 $\leq$ MAX) $\rightarrow$ 1 : (_SAH' = _SAH + 1);
+	endmodule
+	
+	module _GAA_INT
+	_GAA_INT : [0..MAX] init $GAA\_INT$;
+		[_uptake] (_GAA_INT + 1 $\leq$ MAX) $\rightarrow$ 1 : (_GAA_INT' = _GAA_INT + 1);
+		[_gamt] (_GAA_INT $\geq$ 1) $\rightarrow$ 1 : (_GAA_INT' = _GAA_INT - 1);
+	endmodule
+	
+	module _GAA_EXT
+		_GAA_EXT : [0..MAX] init $GAA\_EXT$;
+		[_uptake] (_GAA_EXT $\geq$ 1) $\rightarrow$ 1 : (_GAA_EXT' = _GAA_EXT - 1);
+	endmodule
+	
+	module _CR
+		_CR : [0..MAX] init $CR$;
+		[_gamt] (_CR + 1 $\leq$ MAX) $\rightarrow$ 1 : (_CR' = _CR + 1);
+	endmodule
+	
+	
+	rewards "_sams"
+		[_sams] true : 1;
+	endrewards
+	
+	rewards "_gamt"
+		[_gamt] true : 1;
+	endrewards
+	
+	rewards "_uptake"
+		[_uptake] true : 1;
+	endrewards
+	
+	rewards "_SAM"
+		true : _SAM;
+	endrewards
+	
+	rewards "_SAM_squared"
+		true : _SAM * _SAM;
+	endrewards
+	
+	rewards "_SAH"
+		true : _SAH;
+	endrewards
+	
+	rewards "_SAH_squared"
+		true : _SAH * _SAH;
+	endrewards
+	
+	rewards "_GAA_INT"
+		true : _GAA_INT;
+	endrewards
+	
+	rewards "_GAA_INT_squared"
+		true : _GAA_INT * _GAA_INT;
+	endrewards
+	
+	rewards "_GAA_EXT"
+		true : _GAA_EXT;
+	endrewards
+	
+	rewards "_GAA_EXT_squared"
+		true : _GAA_EXT * _GAA_EXT;
+	endrewards
+	
+	rewards "_CR"
+		true : _CR;
+	endrewards
+	
+	rewards "_CR_squared"
+		true : _CR * _CR;
+	endrewards
+	
+	rewards "_UM_SAM"
+		true : (_SAM / 10.0);
+	endrewards
+	
+	rewards "_UM_SAH"
+		true : (_SAH / 10.0);
+	endrewards
+	
+	rewards "_UM_GAA_INT"
+		true : (_GAA_INT / 10.0);
+	endrewards
+	
+	rewards "_UM_GAA_EXT"
+		true : (_GAA_EXT / 10.0);
+	endrewards
+	
+	rewards "_UM_CR"
+		true : (_CR / 10.0);
+	endrewards\end{lstlisting}

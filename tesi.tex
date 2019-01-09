@@ -1,0 +1,91 @@
+\documentclass[a4paper,twoside,11pt]{report}
+%\documentclass[a4paper,singleside,11pt]{report}
+
+\usepackage{bio_urb_thesis}
+\usepackage[italian]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{amsmath,
+			algorithm2e,
+		    amsfonts,
+		    amstext,
+		    amssymb,
+		    mathrsfs,
+		    mathtools,
+		    latexsym,
+		    graphicx,
+		    epsfig,
+		    color,
+		    tikz,
+		    verbatim,
+		    pgfplots,
+		    pgfplotstable,
+		    float,
+		    scrextend,
+		    url,
+		    rotating}
+	    
+\usepackage[nounderscore]{syntax}
+\usepackage[range-phrase = --]{siunitx}
+
+\usetikzlibrary{positioning}
+\usetikzlibrary{pgfplots.groupplots,spy,backgrounds,shadows}
+
+\usepackage[backend=bibtex,style=trad-plain, sorting=nty,firstinits=true]{biblatex}
+\addbibresource{sorgenti/biblio.bib}
+
+\usepackage[formats]{listings}
+\lstdefinelanguage{prism}{
+	morekeywords={rewards, endrewards, ctmc, module, endmodule, const, double, true, init},
+	sensitive=false, % keywords are not case-sensitive
+}
+
+\lstset{
+	numbers = left,
+	framexleftmargin=10mm,
+	frame=none,
+	backgroundcolor=\color[RGB]{245,245,244},
+	showstringspaces=true,
+	tabsize=2,
+	breaklines=true
+}
+
+\begin{document}
+	
+	\titolo{Modellazione formale applicata ad analisi \emph{in silico} di reti metaboliche}
+	\candidato{Luca Salvatore Lorello}
+	\relatore{Chiar.mo Prof.~Mauro Magnani}
+	\correlatori{Chiar.mo Prof.~Marco Bernardo\\Dott.ssa~Noemi Bigini\\Dott.ssa~Francesca Pierig\`e}
+	\annoaccademico{2017-2018}
+	
+	\copertinatesi 
+	\dedica{A quei pochi che leggeranno effettivamente.}
+	\indice
+	\indicefigure
+	\indicetabelle
+	\iniziatesto
+	
+	\include{sorgenti/cap_1}
+	\include{sorgenti/cap_2}
+	\include{sorgenti/cap_3}
+	\include{sorgenti/cap_4}
+	\include{sorgenti/cap_5}
+	\include{sorgenti/cap_6}
+	\include{sorgenti/cap_7}
+	
+	\appendix
+	
+	\printbibliography % biblatex
+
+	
+	\ringraziamenti
+		Si ringraziano i professori Jane Hillston e Stephen Gilmore per il loro aiuto sulla sintassi di Bio-PEPA.
+		
+		Si ringraziano i dott.ri Marco Cappellacci, Paolo Cecchini e Andrea Seraghiti e la Sezione di Scienze e Tecnologiedell'Informazione dell'Universit\`a di Urbino per aver messo a disposizione una macchina sufficientemente potente per l'applicazione delle tecniche descritte nel capitolo \ref{cap:modelchecking}.
+		Si ringrazia infine la prof.ssa Simona Scacchi per la correzione delle bozze.
+		
+\end{document}

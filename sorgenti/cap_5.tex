@@ -1,0 +1,879 @@
+\chapter{Analisi simulativa del trattamento della deficienza GAMT}\label{cap:simulazione}
+In questo capitolo viene presentato l'esito delle simulazioni effettuate sui modelli sotto forma di grafici relativi all'andamento delle varie specie in funzione del tempo.
+Pi\`u in dettaglio, sono stati ripetuti gli esperimenti gi\`a effettuati \emph{in vitro}, relativamente all'uptake di guanidinoacetato (sez. \ref{sez:simup}) e al dosaggio della creatina prodotta (sez. \ref{sez:simsint}), e gli esperimenti non ancora effettuati relativi all'incapsulamento di SAMS e GAMT (sez. \ref{sez:simpred}).
+
+
+\section{Simulazione dell'esperimento sull'uptake del guanidinoacetato}\label{sez:simup}
+I modelli \ref{mod:1}-\ref{mod:4} sono stati utilizzati per simulare l'esperimento di uptake di guanidinoacetato (sezione \ref{sez:uptake}).
+Ogni modello \`e stato simulato per 60 minuti, con un campionamento degli eventi ogni 10 minuti.
+La figura \ref{fig:uptake} raggruppa le quattro simulazioni e le sovrappone ai dati sperimentali.
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+		\begin{axis}[axis lines=middle, xmin=0, xmax=60, ymin=0, ymax=70,samples=1000, xtick={0,10,...,60}, xlabel={$t (min)$}, ylabel={$[GAA*] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east,
+		legend entries={$10 \mu M$ GAA*, $25 \mu M$ GAA*, $50 \mu M$ GAA*, $100 \mu M$ GAA*, Sperimentali}]
+		
+		\addplot[
+		ultra thin,
+		scatter,forget plot,
+		point meta=explicit symbolic,
+		scatter/classes={
+			gaa10={mark=asterisk,draw=black,mark size=2},
+			gaa25={mark=pentagon, draw=black,mark size=2},
+			gaa50={mark=diamond, draw=black,mark size=2},
+			gaa100={mark=o,draw=black,mark size=2},
+			uptakeexp={mark=+,draw=black,mark size=2}}
+		]
+		file{../Dati/001-004/001.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,forget plot,
+		point meta=explicit symbolic,
+		scatter/classes={
+			gaa10={mark=asterisk,draw=black,mark size=2},
+			gaa25={mark=pentagon, draw=black,mark size=2},
+			gaa50={mark=diamond, draw=black,mark size=2},
+			gaa100={mark=o,draw=black,mark size=2},
+			uptakeexp={mark=+,draw=black,mark size=2}}
+		]
+		file{../Dati/001-004/002.txt};
+		
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,forget plot,
+		point meta=explicit symbolic,
+		scatter/classes={
+			gaa10={mark=asterisk,draw=black,mark size=2},
+			gaa25={mark=pentagon, draw=black,mark size=2},
+			gaa50={mark=diamond, draw=black,mark size=2},
+			gaa100={mark=o,draw=black,mark size=2},
+			uptakeexp={mark=+,draw=black,mark size=2}}
+		]
+		file{../Dati/001-004/003.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,forget plot,
+		point meta=explicit symbolic,
+		scatter/classes={
+			gaa10={mark=asterisk,draw=black,mark size=2},
+			gaa25={mark=pentagon, draw=black,mark size=2},
+			gaa50={mark=diamond, draw=black,mark size=2},
+			gaa100={mark=o,draw=black,mark size=2},
+			uptakeexp={mark=+,draw=black,mark size=2}}
+		]
+		file{../Dati/001-004/004.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		only marks,
+		forget plot,
+		scatter/classes={
+			gaa10={mark=asterisk,draw=black,mark size=2},
+			gaa25={mark=pentagon, draw=black,mark size=2},
+			gaa50={mark=diamond, draw=black,mark size=2},
+			gaa100={mark=o,draw=black,mark size=2},
+			uptakeexp={mark=+,draw=black,mark size=2}}
+		]
+		file{../Dati/uptake.txt};
+		
+		\addlegendimage{mark=asterisk}
+		\addlegendimage{mark=pentagon}
+		\addlegendimage{mark=diamond}
+		\addlegendimage{mark=o}
+		\addlegendimage{only marks, mark=+}
+		
+		
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Validazione dell'esperimento di uptake di guanidinoacetato}
+	\label{fig:uptake}
+\end{figure}
+Si pu\`o notare come la fedelt\`a delle simulazioni rispetto ai dati sperimentali sia molto alta per tutte le concentrazioni iniziali considerate, ad eccezione del caso dell'incubazione con $100 \mu M$ di guanidinoacetato.
+Tale curva presenta una leggera sovrastima rispetto ai dati sperimentali da attribuire, probabilmente, a una sottospecifica del modello.
+Il volume degli eritrociti \`e infatti finito ed \`e ragionevole pensare che si presentino fenomeni di saturazione non dipendenti dal meccanismo di trasporto (che essendo una diffusione passiva non pu\`o essere, per sua natura, saturabile), bens\`i dal poco spazio a disposizione all'interno degli eritrociti per contenere grandi quantit\`a di guanidinoacetato.
+
+Questa sovrastima \`e comunque accettabile, considerando il fatto che le aliquote di eritrociti ingegnerizzati utilizzate per questa serie di esperimenti risulta molto bassa rispetto a quelle utilizzate per gli esperimenti successivi.
+
+\section{Simulazione dell'esperimento sulla sintesi di creatina}\label{sez:simsint}
+	I modelli \ref{mod:5}-\ref{mod:7} simulano l'esperimento di dosaggio della creatina prodotta da eritrociti ingegnerizzati con GAMT (sezione \ref{sez:dosaggio}).
+	Ogni modello \`e stato simulato per 10 ore, con un campionamento ogni minuto.
+	Nei grafici \ref{fig:syntgaa} e \ref{fig:syntcr} sono mostrati gli andamenti delle concentrazioni del guanidinoacetato intracellulare e della creatina nel tempo.
+	Il numero di marker \`e stato ridotto per aumentare la leggibilit\`a dei grafici.
+	
+	Si pu\`o osservare dalle curve ``Unloaded'', relative al modello \ref{mod:5}, che gli eritrociti nativi non sono dotati di alcuna attivit\`a di sintesi della creatina, quindi si limitano ad accumulare guanidinoacetato al loro interno.
+	
+	Le altre curve presentano invece due regioni separate da un brusco cambiamento di tendenza che coincide con l'esaurimento di S-adenosil metionina incapsulata.
+	Nella prima si osservano una decrescita del guanidinoacetato e una crescita della creatina prodotta, indicando l'utilizzo dell'S-adenosil metionina incapsulata.
+	La seconda mostra invece un andamento costante della creatina e un accumulo di guanidinoacetato, indicando che una volta esaurita l'S-adenosil metionina, la SAMS nativa non \`e in grado di produrne di nuova a una velocit\`a sufficientemente elevata da far riprendere la reazione di sintesi della creatina. 
+	
+\clearpage
+\begin{sidewaysfigure}
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+		\begin{axis}[axis lines=middle, xmin=0, xmax=300, ymin=0, ymax=85,samples=1000, xtick={0,60,...,300}, xlabel={$t (min)$}, ylabel={$[Gaa_{int}] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east, mark repeat={10}]
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			sam10={mark=asterisk,draw=black,mark size=2},
+			sam50={mark=pentagon, draw=black,mark size=2},
+			unload={mark=diamond, draw=black,mark size=2}}
+		]
+		file{../Dati/005-007/005-gaa.txt};
+		
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			sam10={mark=asterisk,draw=black,mark size=2},
+			sam50={mark=pentagon, draw=black,mark size=2},
+			unload={mark=diamond, draw=black,mark size=2}}
+		]
+		file{../Dati/005-007/006-gaa.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			sam10={mark=asterisk,draw=black,mark size=2},
+			sam50={mark=pentagon, draw=black,mark size=2},
+			unload={mark=diamond, draw=black,mark size=2}}
+		]
+		file{../Dati/005-007/007-gaa.txt};
+		
+		
+		\legend{$10 \mu M$ SAM, $50 \mu M$ SAM, Unloaded};
+		
+		\coordinate (spypoint) at (axis cs:10,65);
+		\coordinate (spyviewer) at (axis cs:100,20);
+		\end{axis}
+		\spy [height=2.5cm, width=3cm,spy connection path={
+			\begin{scope}[on background layer]
+			\draw (tikzspyonnode.north east) -- (tikzspyinnode.north east);
+			\draw (tikzspyonnode.north west) -- (tikzspyinnode.north west);
+			\draw (tikzspyonnode.south west) -- (tikzspyinnode.south west);
+			\draw (tikzspyonnode.south east) -- (tikzspyinnode.south east);
+			\end{scope}
+		}] on (spypoint)
+		in node [fill=white] at (spyviewer);
+		\end{tikzpicture}
+	}
+	\caption{Validazione dell'esperimento di sintesi di creatina: andamento del guanidinoacetato intracellulare}
+	\label{fig:syntgaa}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}
+		\begin{axis}[axis lines=middle, xmin=0, xmax=120, ymin=0, ymax=60,samples=1000, xtick={0,20,...,120}, xlabel={$t (min)$}, ylabel={$[Cr] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east, mark repeat={3}]
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			sam10={mark=asterisk,draw=black,mark size=2},
+			sam50={mark=pentagon, draw=black,mark size=2},
+			unload={mark=diamond, draw=black,mark size=2}}
+		]
+		file{../Dati/005-007/005-cr.txt};
+		
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			sam10={mark=asterisk,draw=black,mark size=2},
+			sam50={mark=pentagon, draw=black,mark size=2},
+			unload={mark=diamond, draw=black,mark size=2}}
+		]
+		file{../Dati/005-007/006-cr.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			sam10={mark=asterisk,draw=black,mark size=2},
+			sam50={mark=pentagon, draw=black,mark size=2},
+			unload={mark=diamond, draw=black,mark size=2}}
+		]
+		file{../Dati/005-007/007-cr.txt};
+		
+		
+		\legend{$10 \mu M$ SAM, $50 \mu M$ SAM, Unloaded};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Validazione dell'esperimento di sintesi di creatina: andamento della creatina}
+	\label{fig:syntcr}
+\end{sidewaysfigure}
+\clearpage
+
+\section{Simulazione di eritrociti ingegnerizzati con GAMT e SAMS}\label{sez:simpred}
+	I modelli \ref{mod:8}-\ref{mod:14} simulano esperimenti non ancora effettuati che prevedono l'incapsulamento di una quantit\`a fissa di GAMT e di una quantit\`a variabile di SAMS clonata da \emph{E.\ coli}.
+	Ogni modello \`e stato simulato per 10 ore, con un campionamento ogni 10 minuti.
+	Le figure \ref{fig:008}-\ref{fig:014} mostrano l'andamento di tutte le specie per ogni simulazione, mentre le figure \ref{fig:crsynt} e \ref{fig:gaacons} confrontano l'andamento, rispettivamente, della sintesi di creatina e del consumo di guanidinoacetato tra tutte le simulazioni, ad eccezione del modello \ref{mod:14} che, andando in saturazione, presenta dati non realistici.
+	
+	Si pu\`o osservare che il cambiamento di tendenza sulle curve del guanidinoacetato, appena visibile in figura \ref{fig:008} (e coincidente con l'esaurimento dell'S-adenosil metionina), viene mascherato nelle altre figure dall'attivit\`a della SAMS.
+	L'S-adenosil metionina prodotta viene immediatamente sequestrata dalla GAMT, quindi la sintesi di creatina e il consumo di guanidinoacetato sono in grado di proseguire, nonostante i livelli di S-adenosil metionina siano mantenuti apparentemente a zero.
+	
+	L'attivit\`a della GAMT risulta essere proporzionale all'attivit\`a della SAMS incapsulata in un intervallo molto ampio.
+	Nelle figure \ref{fig:013} e \ref{fig:014} si osserva invece una cinetica della SAMS che supera quella della GAMT, causando un accumulo di S-adenosil metionina, fino a raggiungere la saturazione.
+	
+	Le figure \ref{fig:crsynt} e \ref{fig:gaacons} evidenziano l'andamento proporzionale della cinetica della GAMT rispetto alla quantit\`a di SAMS incapsulata (e quindi della sua cinetica).
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}
+		\begin{axis}[axis lines=middle, xmin=0, xmax=240, ymin=0, ymax=55,samples=1000, xtick={0,60,...,240}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east]
+
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+			]
+			file{../Dati/008-014/008-sam.txt};
+			\addplot[
+			ultra thin,
+			scatter,
+				mark=pentagon,mark size=2, black,scatter/use mapped color=
+				{draw=black,fill=red}
+				]
+				file{../Dati/008-014/008-sah.txt};
+
+				
+				\addplot[
+				ultra thin,
+				scatter,
+					mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+					]
+					file{../Dati/008-014/008-gaa_int.txt};
+		
+				\addplot[
+				ultra thin,
+				scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+					]
+					file{../Dati/008-014/008-gaa_ext.txt};
+		
+				\addplot[
+				ultra thin,
+				scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+					]
+					file{../Dati/008-014/008-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Simulazione di controllo con SAMS nativa (modello \ref{mod:8})}
+	\label{fig:008}
+\end{figure}
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}
+		\begin{axis}[axis lines=middle, xmin=0, xmax=240, ymin=0, ymax=55,samples=1000, xtick={0,60,...,240}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east]
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/009-sam.txt};
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=pentagon,mark size=2, black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/009-sah.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/009-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/009-gaa_ext.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/009-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Simulazione dell'incapsulamento di 0.05 mg di SAMS (modello \ref{mod:9})}
+	\label{fig:009}
+\end{figure}
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}
+		\begin{axis}[axis lines=middle, xmin=0, xmax=240, ymin=0, ymax=55,samples=1000, xtick={0,60,...,240}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east]
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/010-sam.txt};
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=pentagon,mark size=2, black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/010-sah.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/010-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/010-gaa_ext.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/010-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Simulazione dell'incapsulamento di 0.1 mg di SAMS (modello \ref{mod:10})}
+	\label{fig:010}
+\end{figure}
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+		\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=55,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east,mark repeat={3}]
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/011-sam.txt};
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=pentagon,mark size=2, black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/011-sah.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/011-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/011-gaa_ext.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/011-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Simulazione dell'incapsulamento di 0.5 mg di SAMS (modello \ref{mod:11})}
+	\label{fig:011}
+\end{figure}
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+		\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=55,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east,mark repeat={3}]
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/012-sam.txt};
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=pentagon,mark size=2, black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/012-sah.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/012-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/012-gaa_ext.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/012-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Simulazione dell'incapsulamento di 1 mg di SAMS (modello \ref{mod:12})}
+	\label{fig:012}
+\end{figure}
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+		\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=65,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east,mark repeat={3}]
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/013-sam.txt};
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=pentagon,mark size=2, black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/013-sah.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/013-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/013-gaa_ext.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/013-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+				\coordinate (spypoint) at (axis cs:240,3);
+				\coordinate (spyviewer) at (axis cs:650,20);
+				\end{axis}
+				\spy [height=2.5cm, width=4cm,spy connection path={
+					\begin{scope}[on background layer]
+					\draw (tikzspyonnode.north east) -- (tikzspyinnode.north east);
+					\draw (tikzspyonnode.north west) -- (tikzspyinnode.north west);
+					\draw (tikzspyonnode.south west) -- (tikzspyinnode.south west);
+					\draw (tikzspyonnode.south east) -- (tikzspyinnode.south east);
+					\end{scope}
+				}] on (spypoint)
+				in node [fill=white] at (spyviewer);
+				\end{tikzpicture}
+	}
+	\caption{Simulazione dell'incapsulamento di 2.5 mg di SAMS (modello \ref{mod:13})}
+	\label{fig:013}
+\end{figure}
+
+\begin{figure}[H]
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}
+		\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=65,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[Specie] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east,mark repeat={3}]
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=asterisk,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/014-sam.txt};
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=pentagon,mark size=2, black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/014-sah.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		mark=diamond,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/014-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=o,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/014-gaa_ext.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter, mark=x,mark size=2,black,scatter/use mapped color={draw=black,fill=none}
+		]
+		file{../Dati/008-014/014-cr.txt};
+		
+		\legend{$SAM$, $SAH$, $GAA_{int}$, $GAA_{ext}$, $CR$};
+		
+		\end{axis}
+
+		\end{tikzpicture}
+	}
+	\caption{Simulazione dell'incapsulamento di 5 mg di SAMS (modello \ref{mod:14})}
+	\label{fig:014}
+\end{figure}
+
+\begin{sidewaysfigure}
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+		\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=55,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[Cr] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east, mark repeat={3}]
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/008-cr.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/009-cr.txt};
+		
+		
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/010-cr.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=tria del modellongle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/011-cr.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/012-cr.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/013-cr.txt};
+		
+		
+		\legend{H. sapiens, $0.05mg$, $0.1mg$, $0.5mg$, $1.0mg$, $2.5mg$};
+		
+		\coordinate (spypoint) at (axis cs:30,5);
+		\coordinate (spyviewer) at (axis cs:120,50);
+		\end{axis}
+		\spy [height=1.5cm, width=2cm,spy connection path={
+			\begin{scope}[on background layer]
+			\draw (tikzspyonnode.north east) -- (tikzspyinnode.north east);
+			\draw (tikzspyonnode.north west) -- (tikzspyinnode.north west);
+			\draw (tikzspyonnode.south west) -- (tikzspyinnode.south west);
+			\draw (tikzspyonnode.south east) -- (tikzspyinnode.south east);
+			\end{scope}
+		}] on (spypoint)
+		in node [fill=white] at (spyviewer);
+		\end{tikzpicture}
+	}
+	\caption{Sintesi di creatina negli eritrociti ingegnerizzati con quantit\`a variabili di SAMS di \emph{E.\ coli}}
+	\label{fig:crsynt}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+	\center
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}
+		\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=27
+		,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[GAA_{int}] (\mu M)$}, legend style={font=\tiny},
+		x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+		y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+		tick label style={font=\tiny},
+		label style={font=\tiny},
+		legend pos=outer north east,mark repeat={3}]
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/008-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/009-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/010-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/011-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/012-gaa_int.txt};
+		
+		\addplot[
+		ultra thin,
+		scatter,
+		point meta=explicit symbolic,
+		scatter/classes={
+			emat={mark=asterisk,draw=black,mark size=2},
+			eco005={mark=pentagon, draw=black,mark size=2},
+			eco01={mark=diamond, draw=black,mark size=2},
+			eco05={mark=o,draw=black,mark size=2},
+			eco1={mark=x, draw=black,mark size=2},
+			eco25={mark=square,draw=black,mark size=2},
+			eco5={mark=triangle,draw=black,mark size=2}}
+		]
+		file{../Dati/008-014/013-gaa_int.txt};
+
+		\legend{H. sapiens, $0.05mg$, $0.1mg$, $0.5mg$, $1.0mg$, $2.5mg$};
+		
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\caption{Consumo di guanidinoacetato negli eritrociti ingegnerizzati con quantit\`a variabili di SAMS di \emph{E.\ coli}}
+	\label{fig:gaacons}
+\end{sidewaysfigure}

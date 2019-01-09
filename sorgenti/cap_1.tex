@@ -1,0 +1,43 @@
+\chapter{Introduzione}\label{cap:introduzione}
+	\section{Contesto della tesi}
+		Nonostante i progressi nel campo biologico della ricerca \emph{in vitro}, i costi elevati e la potenziale assenza di informazioni preliminari su un dato fenomeno rendono al giorno d'oggi l'utilizzo delle tecniche \emph{in silico} sempre pi\`u interessanti, non solo come strumenti per l'osservazione e la replicazione del fenomeno, ma soprattutto in termini predittivi.
+		
+		In questa tesi viene descritto un approccio \emph{formale}, basato su algebre di processi, catene di Markov e logiche temporali, applicato alla costruzione di modelli di reti metaboliche, adatti sia all'aspetto replicativo che a quello predittivo tipici di un ``esperimento'' \emph{in silico}, facendo riferimento in particolare alle tecniche di analisi basate su \emph{simulazione} e \emph{verifica formale}.
+		
+		I metodi formali risultano particolarmente efficaci per l'analisi di sistemi complessi, eliminando ogni sorgente di errore attraverso appositi linguaggi che permettono altres\`i di automatizzare lo studio dei sistemi stessi.
+		Partendo da una rappresentazione corretta del metabolismo oggetto d'esame, che catturi aspetti quantitativi, interattivi e cinetici, si possono ottenere, tra le altre, informazioni di natura quantitativa, temporale e prestazionale che non soffrono dell'incertezza tipica degli esperimenti \emph{in vitro}.
+		
+		Sebbene l'approccio simulativo abbia goduto di notevole successo grazie alla sua semplicit\`a di applicazione, non risulta tanto potente quanto quello basato su verifica, mancando dell'esaustivit\`a che contraddistingue quest'ultimo.
+		Viceversa, l'approccio basato su verifica risulta computazionalmente oneroso e richiede strumenti matematici pi\`u complessi.
+		Queste differenze rendono auspicabile un utilizzo sinergico di entrambi gli approcci, per ottenere il maggior numero di informazioni possibile, a partire da una singola descrizione formale del metabolismo.
+		
+		In questa tesi viene affrontata la modellazione di patologie di origine genetica.
+		Esse sono caratterizzate da disordini metabolici permanenti che si riflettono su alterazioni pi\`u o meno estese delle vie coinvolte.
+		Tra le terapie proposte per contrastare tali alterazioni, l'utilizzo di bioreattori circolanti nel flusso ematico si presenta come un approccio promettente, essendo il sangue in grado di raggiungere l'intero organismo.
+		Bioreattori ideali per circolare nel sangue sono gli eritrociti che, se opportunamente ingegnerizzati, sono in grado di incapsulare enzimi in forma nativa che sopperiscono alla mancanza di funzionalit\`a di quelli patologici.
+
+		La patologia utilizzata come esempio per questa tesi \`e la deficienza dell'enzima guanidinoacetato metiltransferasi (GAMT), necessario per la catalisi dell'ultima tappa della via biosintetica della creatina.
+		Oltre ai deficit, a livello cognitivo e muscolare, causati dalla carenza di creatina, l'accumulo del guanidinoacetato, precursore della creatina che nei mammiferi non \`e impiegato in nessun'altra reazione, causa danni al sistema nervoso.
+		La semplice supplementazione di creatina con la dieta non \`e dunque sufficiente ad alleviare i sintomi della patologia.
+		Per una terapia efficace risulta quindi necessario limitare  la produzione del guanidinoacetato o, pi\`u auspicabilmente, eliminarlo attivamente.
+	
+	\section{Obiettivi e contributi della tesi}
+	Questa tesi si prefigge l'obiettivo di descrivere ed esemplificare le tecniche di modellazione e verifica formale pi\`u adatte alla cattura di aspetti interattivi e quantitativi di un sistema biochimico.
+
+	L'approccio descritto \`e utilizzato per \emph{validare} esperimenti \emph{in vitro} gi\`a effettuati e per \emph{predire} l'andamento di esperimenti futuri, relativamente a un nuovo approccio farmacologico, basato su eritrociti ingegnerizzati per il trattamento della deficienza GAMT, usato come caso di studio.
+	
+	Pi\`u in dettaglio, viene proposto un modello espresso nel linguaggio di modellazione algebrico Bio-PEPA, che descrive le interazioni tra il guanidinoacetato dell'ambiente plasmatico di pazienti affetti da deficienza GAMT ed eritrociti modificati da un apparato, chiamato Red Cell Loader, per funzionare da bioreattori in grado di sequestrare guanidinoacetato e liberare creatina.
+	I parametri del modello sono stati successivamente istanziati a valori tali da riprodurre esperimenti \emph{in vitro} gi\`a effettuati, allo scopo di validare la fedelt\`a del modello, e a valori corrispondenti ad esperimenti programmati ma non ancora effettuati, per la predizione dell'andamento.
+	
+	Le istanze del modello sono state automaticamente convertite in un linguaggio di modellazione di pi\`u basso livello, adeguato all'analisi tramite simulazioni ad eventi discreti e model checking utilizzando il software PRISM.
+	Sebbene il modello proposto presenti assunzioni non necessariamente soddisfatte \emph{in vivo}, le simulazioni prodotte a partire da tale modello fungeranno da validazione degli esperimenti che verranno realizzati \emph{in vitro} mentre le propriet\`a verificate tramite model checking forniranno una quantificazione preliminare dell'efficacia della terapia.
+
+	\section{Organizzazione della tesi}
+	Nel capitolo \ref{cap:modellazione} sono descritte in maniera generale le caratteristiche dei metabolismi e le tecniche di modellazione e analisi pi\`u adatte a catturare tali caratteristiche. Il capitolo \ref{cap:casostudio} presenta come caso di studio la deficienza GAMT, un difetto genetico nella via di sintesi di creatina, e il principio di funzionamento del trattamento proposto a base di eritrociti ingegnerizzati tramite Red Cell Loader.
+	
+	Nei capitoli successivi viene mostrato il processo di sperimentazione \emph{in silico} nelle due fasi di creazione del modello (cap. \ref{cap:costruzione}) e analisi, tramite simulazioni a eventi discreti e model checking (capp. \ref{cap:simulazione} e \ref{cap:modelchecking} rispettivamente), sia per validare risultati gi\`a ottenuti che per predire comportamenti non ancora osservati \emph{in vitro}.
+	
+	Il capitolo \ref{cap:conclusioni} conclude il lavoro riassumendo vantaggi e svantaggi delle due tecniche di analisi e descrive potenziali sviluppi futuri, sempre in relazione al caso di studio preso in esame.
+	
+	Si consiglia a un lettore con formazione biologica di cominciare la lettura del capitolo \ref{cap:modellazione} a partire dalla sezione \ref{sez:silico}.
+	Un lettore con formazione informatica pu\`o limitarsi a leggere le sezioni \ref{sez:caratt} e \ref{sez:biopepa}.

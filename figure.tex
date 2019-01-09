@@ -1,0 +1,178 @@
+\documentclass{standalone}
+
+
+\usepackage[italian]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{rotating}
+
+\usepackage{amsmath,
+	algorithm2e,
+	amsfonts,
+	amstext,
+	amssymb,
+	mathrsfs,
+	mathtools,
+	%stmaryrd,
+	latexsym,
+	%enumitem,
+	% proof,
+	graphicx,
+	epsfig,
+	color,
+	tikz,
+	verbatim,
+	pgfplots,
+	pgfplotstable,
+	float,
+	scrextend,
+	url}
+%hyperref,
+%comment}
+
+\usepackage[nounderscore]{syntax}
+\usepackage[range-phrase = --]{siunitx}
+
+\usetikzlibrary{positioning}
+\usetikzlibrary{pgfplots.groupplots,spy,backgrounds,shadows}
+
+
+
+\begin{document}
+	\begin{sidewaysfigure}
+			\begin{tikzpicture}[spy using outlines={rectangle, magnification=3.0}, connect spies]
+			\begin{axis}[axis lines=middle, xmin=0, xmax=600, ymin=0, ymax=55,samples=1000, xtick={0,60,...,600}, xlabel={$t (min)$}, ylabel={$[Cr] (\mu M)$}, legend style={font=\tiny},
+			x label style={at={(axis description cs:0.5,-0.1)},anchor=north},
+			y label style={at={(axis description cs:-0.1,.5)},rotate=90,anchor=south},
+			tick label style={font=\tiny},
+			label style={font=\tiny},
+			legend pos=outer north east]
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/emat.txt};
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/eco005.txt};
+			
+			
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/eco01.txt};
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/eco05.txt};
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/eco1.txt};
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/eco25.txt};
+			
+			\addplot[
+			ultra thin,
+			scatter,
+			point meta=explicit symbolic,
+			scatter/classes={
+				emat={mark=asterisk,draw=black,mark size=1},
+				eco005={mark=pentagon, draw=black,mark size=1},
+				eco01={mark=diamond, draw=black,mark size=1},
+				eco05={mark=o,draw=black,mark size=1},
+				eco1={mark=x, draw=black,mark size=1},
+				eco25={mark=square,draw=black,mark size=1},
+				eco5={mark=triangle,draw=black,mark size=1}}
+			]
+			file{../Dati/CR/eco5.txt};
+			
+			
+			\legend{H. sapiens, $0.05mg$, $0.1mg$, $0.5mg$, $1.0mg$, $2.5mg$, $5.0mg$};
+			
+			\coordinate (spypoint) at (axis cs:30,5);
+			\coordinate (spyviewer) at (axis cs:120,50);
+			\end{axis}
+			\spy [height=1.5cm, width=2cm,spy connection path={
+				\begin{scope}[on background layer]
+				\draw (tikzspyonnode.north east) -- (tikzspyinnode.north east);
+				\draw (tikzspyonnode.north west) -- (tikzspyinnode.north west);
+				\draw (tikzspyonnode.south west) -- (tikzspyinnode.south west);
+				\draw (tikzspyonnode.south east) -- (tikzspyinnode.south east);
+				\end{scope}
+			}] on (spypoint)
+			in node [fill=white] at (spyviewer);
+			\end{tikzpicture}
+	\end{sidewaysfigure}
+\end{document}

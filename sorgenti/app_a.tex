@@ -1,0 +1,30 @@
+\chapter{Grammatica Bio-PEPA}\label{cap:gramm}
+
+	\section{Bio-PEPA}\label{sez:biopepagram}
+	
+	
+	
+	\section{Bio-PEPA Workbench}\label{sec:biopepawb}
+
+\chapter{Modelli}\label{cap:gamtmodel}
+	\section{Modello Bio-PEPA}
+		\subsection{GAMT deficiency.biopepa}
+			\verbatiminput{"../GAMT deficiency.biopepa"}
+		
+		\subsection{GAMT deficiency.csv}
+			Per questioni di spazio, il contenuto della tabella viene incluso trasponendo righe e colonne.
+				\pgfplotstableread[col sep=comma]{../GAMT deficiency.csv}\tabella
+				\pgfplotstabletranspose*[input colnames to=Costanti]\trasposta\tabella
+				\begin{table}[H]
+					\begin{center}
+QUESTA TABELLA CAUSA ERRORI%						\pgfplotstabletypeset[string type]\trasposta
+					\end{center}
+					\caption{Parametri di modellazione per ogni simulazione eseguita}
+					\label{tab:csv}
+				\end{table}
+			
+	\section{Modello PRISM}
+	
+	\section{Propriet\`a PRISM}
+	
+	\section{Esito del model checking}
